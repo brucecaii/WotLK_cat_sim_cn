@@ -5,6 +5,7 @@
 中文版本由范克瑞斯Espeon进行翻译,优化,更新,以及代码编译
 
 任何问题请到B站站内信咨询 https://space.bilibili.com/919498
+
 Github https://github.com/eeveecc/WotLK_cat_sim_cn
 
 ## Release Note
