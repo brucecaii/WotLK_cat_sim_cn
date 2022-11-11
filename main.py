@@ -394,7 +394,7 @@ encounter_details = dbc.Col(
                     {'label': '2', 'value': 2},
                     {'label': '3', 'value': 3},
                 ],
-                value=2, id='potp',
+                value=3, id='potp',
                 style={
                     'width': '20%', 'display': 'inline-block',
                     'marginBottom': '2.5%', 'marginRight': '5%'
@@ -712,7 +712,7 @@ iteration_input = dbc.Col([
         options=[{
             'label': '熊T和武器战负责流血Debuff',
             'value': 'bear_mangle'
-        }], value=[], id='bear_mangle'
+        }], value=['bear_mangle'], id='bear_mangle'
     ),
     dbc.Collapse(
         [
