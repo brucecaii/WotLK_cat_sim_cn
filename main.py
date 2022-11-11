@@ -653,7 +653,7 @@ iteration_input = dbc.Col([
                     )
                 ],
                 style={
-                    'width': '65%', 'marginBottom': '1%', 'marginLeft': '5%'
+                    'width': '90%', 'marginBottom': '1%', 'marginLeft': '5%'
                 }
             ),
             dbc.InputGroup(
@@ -670,7 +670,7 @@ iteration_input = dbc.Col([
                     ),
                 ],
                 style={
-                    'width': '65%', 'marginBottom': '1%', 'marginLeft': '5%'
+                    'width': '90%', 'marginBottom': '1%', 'marginLeft': '5%'
                 }
             ),
             dbc.Collapse(
@@ -690,7 +690,7 @@ iteration_input = dbc.Col([
                             )
                         ],
                         style={
-                            'width': '65%', 'marginBottom': '1%',
+                            'width': '90%', 'marginBottom': '1%',
                             'marginLeft': '5%'
                         }
                     ),
@@ -767,7 +767,7 @@ iteration_input = dbc.Col([
                             )
                         ],
                         style={
-                            'width': '70%', 'marginBottom': '1%',
+                            'width': '90%', 'marginBottom': '1%',
                             'marginLeft': '5%', 'marginTop': '1%',
                         }
                     ),
