@@ -817,7 +817,7 @@ iteration_input = dbc.Col([
             ),
             dbc.Checklist(
                 options=[{
-                    'label': ' reset swing timer using fast dagger',
+                    'label': '快速武器延迟平砍',
                     'value': 'daggerweave'
                 }],
                 value=['daggerweave'], id='daggerweave',
@@ -828,7 +828,7 @@ iteration_input = dbc.Col([
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon(
-                                'EP loss from dagger swap:',
+                                '更换武器的EP损失',
                                 addon_type='prepend'
                             ),
                             dbc.Input(
