@@ -853,12 +853,11 @@ iteration_input = dbc.Col([
         dbc.Col(dbc.Select(
             id='trinket_1',
             options=[
-                {'label': 'Empty', 'value': 'none'},
-                {'label': 'Comet\'s Trail', 'value': 'comet_trail'},
-                {'label': 'Mjolnir Runestone', 'value': 'mjolnir_runestone'},
-                {'label': 'Dark Matter', 'value': 'dark_matter'},
-                {'label': 'Pyrite Infusion', 'value': 'pyrite_infuser'},
-                {'label': 'Wrathstone', 'value': 'wrathstone'},
+                {'label': '彗星之痕', 'value': 'comet_trail'},
+                {'label': '雷神符石', 'value': 'mjolnir_runestone'},
+                {'label': '黑暗物质', 'value': 'dark_matter'},
+                {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
+                {'label': '天谴之石', 'value': 'wrathstone'},
                 {
                     'label': '伟大卡牌(力量)',
                     'value': 'dmcg_str',
@@ -889,11 +888,11 @@ iteration_input = dbc.Col([
             id='trinket_2',
             options=[
                 {'label': 'Empty', 'value': 'none'},
-                {'label': 'Comet\'s Trail', 'value': 'comet_trail'},
-                {'label': 'Mjolnir Runestone', 'value': 'mjolnir_runestone'},
-                {'label': 'Dark Matter', 'value': 'dark_matter'},
-                {'label': 'Pyrite Infusion', 'value': 'pyrite_infuser'},
-                {'label': 'Wrathstone', 'value': 'wrathstone'},
+                {'label': '彗星之痕', 'value': 'comet_trail'},
+                {'label': '雷神符石', 'value': 'mjolnir_runestone'},
+                {'label': '黑暗物质', 'value': 'dark_matter'},
+                {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
+                {'label': '天谴之石', 'value': 'wrathstone'},
                 {
                     'label': '伟大卡牌(力量)',
                     'value': 'dmcg_str',
