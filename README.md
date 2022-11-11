@@ -14,3 +14,7 @@ Github https://github.com/eeveecc/WotLK_cat_sim_cn
 2022.11.3  修正翻译,增加平砍重置
 2022.11.10 增加回蓝BUFF,支持爪子舞/神像舞,优化平砍,增加T8效果
 ```
+
+## Compile
+
+`pyinstaller -F main.py player.py sim_utils.py trinkets.py wotlk_cat_sim.py`
