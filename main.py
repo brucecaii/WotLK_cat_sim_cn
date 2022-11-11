@@ -2071,7 +2071,7 @@ def disable_options(
 ):
     bearweave_options = {'label': '熊猫舞流派', 'value': 'bearweave'}
     flowershift_options = {
-        'label': ' enable flowershifting', 'value': 'flowershift'
+        'label': '爪子舞流派', 'value': 'flowershift'
     }
 
     if bearweave:
