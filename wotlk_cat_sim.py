@@ -684,7 +684,7 @@ class Simulation():
             return False
 
         # Project Rip end time assuming full Glyph of Shred extensions.
-        max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph
+        max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph + 8 * self.player.t8_4p_bonus
         rip_end = self.rip_start + max_rip_dur
 
         # If the existing Roar already falls off well after the existing Roar,
@@ -820,7 +820,9 @@ class Simulation():
             # to swapping back to our normal weapon.
             if self.strategy['flowershift'] and self.strategy['daggerweave']:
                 next_swing = time
-                self.player.attack_power -= self.strategy['dagger_ep_loss']
+                self.player.attack_power -= (
+                    self.strategy['dagger_ep_loss'] * self.player.ap_mod
+                )
                 self.player.calc_damage_params(**self.params)
                 self.player.dagger_equipped = True
 
@@ -1594,9 +1596,9 @@ class Simulation():
                     # If daggerweaving, swap back to normal weapon after the
                     # swing goes out.
                     if self.player.dagger_equipped:
-                        self.player.attack_power = (
-                            self.player.attack_power
-                            + self.strategy['dagger_ep_loss']
+                        self.player.attack_power += (
+                            self.strategy['dagger_ep_loss']
+                            * self.player.ap_mod
                         )
                         self.player.calc_damage_params(**self.params)
                         self.player.dagger_equipped = False

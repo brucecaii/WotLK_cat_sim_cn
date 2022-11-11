@@ -828,11 +828,11 @@ iteration_input = dbc.Col([
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon(
-                                '更换武器的EP损失',
+                                '更换武器EP损失(默认碎裂重锤BIS)',
                                 addon_type='prepend'
                             ),
                             dbc.Input(
-                                type='number', value=1461, id='dagger_ep_loss',
+                                type='number', value=1323, id='dagger_ep_loss',
                                 min=0, step=1
                             ),
                         ],
