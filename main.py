@@ -794,7 +794,7 @@ iteration_input = dbc.Col([
         id='bearweave_options', is_open=True
     ),
     dbc.Checklist(
-        options=[{'label': ' enable flowershifting', 'value': 'flowershift'}],
+        options=[{'label': '爪子舞流派', 'value': 'flowershift'}],
         value=[], id='flowershift'
     ),
     dbc.Collapse(
@@ -802,7 +802,7 @@ iteration_input = dbc.Col([
             dbc.InputGroup(
                 [
                     dbc.InputGroupAddon(
-                        'Number of targets for Gift of the Wild:',
+                        '团队内友方目标数量(包括宠物):',
                         addon_type='prepend'
                     ),
                     dbc.Input(
