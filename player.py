@@ -285,7 +285,7 @@ class Player():
         rip_multiplier = damage_multiplier * (1 + 0.15 * self.t6_bonus)
         self.rip_tick = {
             i: (36 + 93*i + 0.01*i*ap + self.rip_bonus*i) * rip_multiplier
-            for i in range(1,6)
+            for i in range(1, 6)
         }
 
         # Bearweave damage calculations
@@ -295,7 +295,7 @@ class Player():
         bear_bonus_damage = (
             (bear_ap + self.debuff_ap) / 14 * 2.5 + self.bonus_damage
         )
-        bear_multi = self.multiplier * 1.04 # Master Shapeshifter
+        bear_multi = self.multiplier * 1.04  # Master Shapeshifter
         self.white_bear_low = (109.0 + bear_bonus_damage) * bear_multi
         self.white_bear_high = (165.0 + bear_bonus_damage) * bear_multi
         maul_multi = sf_fac * 1.2
@@ -994,7 +994,7 @@ class Player():
         self.cat_form = False
         self.gcd = self.spell_gcd
         self.dmg_breakdown['Gift of the Wild']['casts'] += 1
-        self.mana -= 1119 # Glyph of the Wild assumed
+        self.mana -= 1119  # Glyph of the Wild assumed
         self.five_second_rule = True
         self.last_shift = time
         self.ready_to_gift = False

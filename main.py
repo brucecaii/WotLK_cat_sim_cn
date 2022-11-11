@@ -25,63 +25,68 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 default_input_stats = {
-        "agility": 977,
-        "armor": 5468,
-        "armorPen": 12.28,
-        "armorPenRating": 172,
-        "attackPower": 7360,
-        "crit": 46.62,
-        "critRating": 570,
-        "critReduction": 6,
-        "defense": 400,
-        "dodge": 30,
-        "expertise": 23,
-        "expertiseRating": 113,
-        "feralAttackPower": 2353,
-        "haste": 12.61,
-        "hasteRating": 318,
-        "health": 19527,
-        "hit": 5.25,
-        "hitRating": 172,
-        "intellect": 211,
-        "mainHandSpeed": 2.4,
-        "mana": 6381,
-        "natureResist": 10,
-        "parry": 5,
-        "spellCrit": 15.53,
-        "spellCritRating": 570,
-        "spellHaste": 9.7,
-        "spellHit": 6.56,
-        "spirit": 193,
-        "stamina": 1229,
-        "strength": 234
+    "agility": 977,
+    "armor": 5468,
+    "armorPen": 12.28,
+    "armorPenRating": 172,
+    "attackPower": 7360,
+    "crit": 46.62,
+    "critRating": 570,
+    "critReduction": 6,
+    "defense": 400,
+    "dodge": 30,
+    "expertise": 23,
+    "expertiseRating": 113,
+    "feralAttackPower": 2353,
+    "haste": 12.61,
+    "hasteRating": 318,
+    "health": 19527,
+    "hit": 5.25,
+    "hitRating": 172,
+    "intellect": 211,
+    "mainHandSpeed": 2.4,
+    "mana": 6381,
+    "natureResist": 10,
+    "parry": 5,
+    "spellCrit": 15.53,
+    "spellCritRating": 570,
+    "spellHaste": 9.7,
+    "spellHit": 6.56,
+    "spirit": 193,
+    "stamina": 1229,
+    "strength": 234
 }
 
 stat_input = dbc.Col([
-    html.H5('Eighty Upgrades Input'),
+    html.H5('使用指南'),
     dcc.Markdown(
-        'This simulator uses Eighty Upgrades as its gear selection UI. In '
-        'order to use it, create a Eighty Upgrades profile for your character'
-        ' and download the gear set using the "Export" button at the top right'
-        ' of the character sheet. Make sure that "Cat Form" is selected in the'
-        ' export window, and that "Talents" are checked (and set up in your '
-        'character sheet). Also make sure that trinket and Idol slots are left'
-        ' empty prior to exporting, as these will be selected in the sim UI.',
+        '欢迎使用WLK猫德模拟器!',
         style={'width': 300},
     ),
     dcc.Markdown(
-        'Consumables and party/raid buffs can be specified either in the '
-        'Eighty Upgrades "Buffs" tab, or in the "Consumables" and "Raid '
-        'Buffs " sections in the sim. If the "Buffs" option is checked in the '
-        'Eighty Upgrades export window, then the corresponding sections in '
-        'the sim input will be ignored.',
+        '模拟器源代码 https://github.com/eeveecc/WotLK_cat_sim_cn',
+        style={'width': 300},
+    ),
+    dcc.Markdown(
+        '更多信息参考 https://space.bilibili.com/919498',
+        style={'width': 300},
+    ),
+    dcc.Markdown(
+        '本模拟器需要用到Eighty Upgrades的配装导出文件.'
+        '在你的配装页面的右上角,选择Export,并且选择Cat Form,然后导出.'
+        '确保你勾选了Talent(天赋),取消勾选Buff(因为你可以在模拟器里选择).'
+        '同时确保你把饰品和神像都留空,在模拟器界面里设置即可',
+        style={'width': 300},
+    ),
+    dcc.Markdown(
+        'Eighty Upgrades https://eightyupgrades.com/',
         style={'width': 300},
     ),
     dcc.Upload(
         id='upload-data',
         children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select File')
+            '把装备配置文件拉到这里或者',
+            html.A('选择文件')
         ]),
         style={
             'width': '100%',
@@ -98,43 +103,137 @@ stat_input = dbc.Col([
     ),
     html.Br(),
     html.Div(
-        'No file uploaded, using default input stats instead.',
+        '没有选择文件,正在使用默认属性参数',
         id='upload_status', style={'color': '#E59F3A'}
     ),
-    html.Br(),
-    html.H5('Idols, Glyphs, and Other Bonuses'),
-    dbc.Checklist(
-        options=[{'label': 'Idol of the Raven Goddess', 'value': 'raven'}],
+    html.Br()
+], width='auto', style={'marginBottom': '20px', 'marginLeft': '10px'})
+
+buffs_1 = dbc.Col(
+    [dbc.Collapse([html.H5('合剂和食物'),
+     dbc.Checklist(
+         options=[{'label': '无尽怒气合剂(180AP)', 'value': 'flask'},
+                  {'label': '钳鱼大餐/生拌狼肉糜(40命中)', 'value': 'hit_food'},
+                  {'label': '熏烤龙鳞鱼(40敏捷)', 'value': 'agi_food'},
+                  {'label': '龙鳞鱼片(40力量)', 'value': 'str_food'}],
+         value=['flask', 'str_food'],
+         id='consumables'
+    ),
+        html.Br(),
+        html.H5('团队Buff'),
+        dbc.Checklist(
+         options=[
+             {
+                 'label': '王者祝福',
+                 'value': 'kings'
+             },
+             {
+                 'label': '力量祝福/战斗怒吼',
+                 'value': 'might'
+             },
+             {
+                 'label': '野性赐福',
+                 'value': 'motw'
+             },
+             {
+                 'label': '英勇灵气',
+                 'value': 'heroic_presence'
+             },
+             {
+                 'label': '大地之力图腾/寒冬号角',
+                 'value': 'str_totem'
+             },
+             {
+                 'label': "怒火释放/强击光环/憎恶之力",
+                 'value': 'unleashed_rage'
+             },
+             {
+                 'label': '智慧祝福',
+                 'value': 'wisdom'
+             },
+             {
+                 'label': '奥术智慧',
+                 'value': 'ai'
+             },
+             {
+                 'label': '精神祷言',
+                 'value': 'spirit'
+             }
+         ],
+         value=[
+             'kings', 'might', 'wisdom', 'motw', 'str_totem', 'unleashed_rage',
+             'ai', 'heroic_presence', 'spirit'
+         ],
+         id='raid_buffs'
+    ),
+        html.Br()], id='buff_section', is_open=True),
+        html.H5('光环'),
+        dbc.Checklist(
+        options=[
+            {
+                'label': '圣洁惩戒/凶猛灵感/奥术增效',
+                'value': 'sanc_aura'
+            },
+            {
+                'label': '强化风怒图腾/强化冰爪',
+                'value': 'major_haste'
+            },
+            {
+                'label': '强化枭兽形态/迅捷惩戒',
+                'value': 'minor_haste'
+            },
+            {
+                'label': '空气之怒图腾',
+                'value': 'spell_haste'
+            },
+            {
+                'label': '智慧审判',
+                'value': 'replenishment'
+            },
+        ],
+        value=[
+            'sanc_aura', 'major_haste', 'minor_haste', 'spell_haste',
+            'replenishment'
+        ],
+        id='other_buffs'
+    ),
+        dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(
+                '回春术/野性成长 奶德治疗覆盖:', addon_type='prepend'
+            ),
+            dbc.Input(
+                value=0.0, type='number', id='hot_uptime',
+            ),
+            dbc.InputGroupAddon('%', addon_type='append')
+        ],
+        style={'width': '75%', 'marginTop': '2.5%'}
+    ),
+        html.Br(),
+        html.H5('神像,雕文,以及其他特殊增益'),
+        html.H5('(选择双神像开启高阶神像舞)'),
+        dbc.Checklist(
+        options=[{'label': '乌鸦神像', 'value': 'raven'}],
         value=[], id='raven_idol'
     ),
-    dbc.Checklist(
+        dbc.Checklist(
         options=[
-            {'label': 'Idol of the Ravenous Beast', 'value': 'shred_idol'},
-            {'label': 'Idol of Worship', 'value': 'rip_idol'},
-            {'label': 'Idol of the Wastes', 'value': 'wastes_idol'},
-            {'label': 'Idol of Terror', 'value': 'idol_of_terror'},
-            {
-                'label': "Deadly Gladiator's Idol of Resolve",
-                'value': 'glad_idol'
-            },
-            {'label': 'Idol of the White Stag', 'value': 'stag_idol'},
-            {'label': 'Glyph of Mangle', 'value': 'mangle_glyph'},
-            {'label': 'Glyph of Rip', 'value': 'rip_glyph'},
-            {'label': 'Glyph of Shred', 'value': 'shred_glyph'},
-            {'label': 'Glyph of Savage Roar', 'value': 'roar_glyph'},
-            {'label': 'Glyph of Berserk', 'value': 'berserk_glyph'},
-            {'label': '2-piece Tier 6 bonus', 'value': 't6_2p'},
-            {'label': '4-piece Tier 6 bonus', 'value': 't6_4p'},
-            {'label': '2-piece Tier 7 bonus', 'value': 't7_2p'},
-            {'label': '2-piece Tier 8 bonus', 'value': 't8_2p'},
-            {'label': '4-piece Tier 8 bonus', 'value': 't8_4p'},
-            {'label': 'Wolfshead Helm', 'value': 'wolfshead'},
-            {'label': 'Relentless Earthsiege Diamond', 'value': 'meta'},
-            {'label': 'Band of the Eternal Champion', 'value': 'exalted_ring'},
-            {'label': 'Enchant Weapon: Mongoose', 'value': 'mongoose'},
-            {'label': 'Enchant Weapon: Executioner', 'value': 'executioner'},
-            {'label': 'Enchant Weapon: Berserking', 'value': 'berserking'},
-            {'label': 'Hyperspeed Accelerators', 'value': 'engi_gloves'},
+            {'label': '凶兽神像', 'value': 'shred_idol'},
+            {'label': '膜拜神像', 'value': 'rip_idol'},
+            {'label': '裂伤雕文', 'value': 'mangle_glyph'},
+            {'label': '割裂雕文', 'value': 'rip_glyph'},
+            {'label': '撕碎雕文', 'value': 'shred_glyph'},
+            {'label': '咆哮雕文', 'value': 'roar_glyph'},
+            {'label': '狂暴雕文', 'value': 'berserk_glyph'},
+            {'label': '2T6', 'value': 't6_2p'},
+            {'label': '4T6', 'value': 't6_4p'},
+            {'label': '2T7', 'value': 't7_2p'},
+            {'label': '2T8', 'value': 't8_2p'},
+            {'label': '4T8', 'value': 't8_4p'},
+            {'label': '残酷多彩', 'value': 'meta'},
+            {'label': '武器猫鼬', 'value': 'mongoose'},
+            {'label': '武器狂暴', 'value': 'berserking'},
+            {'label': '手套加速器', 'value': 'engi_gloves'},
         ],
         value=[
             'shred_idol', 'rip_idol', 'rip_glyph', 'shred_glyph', 'roar_glyph',
@@ -142,421 +241,346 @@ stat_input = dbc.Col([
         ],
         id='bonuses'
     ),
-    ], width='auto', style={'marginBottom': '2.5%', 'marginLeft': '2.5%'})
-
-buffs_1 = dbc.Col(
-    [dbc.Collapse([html.H5('Consumables'),
-     dbc.Checklist(
-         options=[{'label': 'Flask of Endless Rage', 'value': 'flask'},
-                  {
-                      'label': 'Snapper Extreme / Worg Tartare',
-                      'value': 'hit_food'
-                  },
-                  {'label': 'Blackened Dragonfin', 'value': 'agi_food'},
-                  {'label': 'Dragonfin Filet', 'value': 'str_food'},
-                  {'label': 'Adamantite Weightstone', 'value': 'weightstone'}],
-         value=['flask', 'str_food'],
-         id='consumables'
-     ),
-     html.Br(),
-     html.H5('Raid Buffs'),
-     dbc.Checklist(
-         options=[{'label': 'Blessing of Kings', 'value': 'kings'},
-                  {
-                      'label': 'Blessing of Might / Battle Shout',
-                      'value': 'might'
-                  },
-                  {
-                      'label': 'Blessing of Wisdom / Mana Spring Totem',
-                      'value': 'wisdom'
-                  },
-                  {'label': 'Mark of the Wild', 'value': 'motw'},
-                  {'label': 'Heroic Presence', 'value': 'heroic_presence'},
-                  {
-                      'label': 'Strength of Earth Totem / Horn of Winter',
-                      'value': 'str_totem'
-                  },
-                  {
-                      'label': "Unleashed Rage / Trueshot Aura / Abomination's Might",
-                      'value': 'unleashed_rage'
-                  },
-                  {'label': 'Arcane Intellect', 'value': 'ai'},
-                  {'label': 'Prayer of Spirit', 'value': 'spirit'}],
-         value=[
-             'kings', 'might', 'wisdom', 'motw', 'str_totem', 'unleashed_rage',
-             'ai'
-         ],
-         id='raid_buffs'
-     ),
-     html.Br()], id='buff_section', is_open=True),
-     html.H5('Other Buffs'),
-     dbc.Checklist(
-         options=[
-             {
-                 'label': 'Sanctified Retribution / Ferocious Inspiration / Arcane Empowerment',
-                 'value': 'sanc_aura'
-             },
-             {'label': 'Braided Eternium Chain', 'value': 'be_chain'},
-             {
-                 'label': 'Improved Windfury Totem / Improved Icy Talons',
-                 'value': 'major_haste'
-             },
-             {
-                 'label': 'Improved Moonkin Form / Swift Retribution',
-                 'value': 'minor_haste'
-             },
-             {'label': 'Wrath of Air Totem', 'value': 'spell_haste'},
-             {'label': 'Mana Replenishment', 'value': 'replenishment'},
-         ],
-         value=[
-             'sanc_aura', 'major_haste', 'minor_haste', 'spell_haste',
-             'replenishment'
-         ],
-         id='other_buffs'
-     ),
-     dbc.InputGroup(
-         [
-             dbc.InputGroupAddon(
-                 'Rejuvenation / Wild Growth uptime:', addon_type='prepend'
-             ),
-             dbc.Input(
-                 value=0.0, type='number', id='hot_uptime',
-             ),
-             dbc.InputGroupAddon('%', addon_type='append')
-         ],
-         style={'width': '75%', 'marginTop': '2.5%'}
-     ),
     ],
-    width='auto', style={'marginBottom': '2.5%', 'marginLeft': '2.5%'}
+    width='25%', style={'marginBottom': '20px', 'marginLeft': '30px'}
 )
 
 encounter_details = dbc.Col(
-    [html.H4('Encounter Details'),
+    [html.H4('战斗设置'),
      dbc.InputGroup(
          [
-             dbc.InputGroupAddon('Fight Length:', addon_type='prepend'),
+             dbc.InputGroupAddon('时长', addon_type='prepend'),
              dbc.Input(
                  value=120.0, type='number', id='fight_length',
              ),
-             dbc.InputGroupAddon('seconds', addon_type='append')
+             dbc.InputGroupAddon('秒', addon_type='append')
          ],
          style={'width': '75%'}
-     ),
-     dbc.InputGroup(
+    ),
+        dbc.InputGroup(
          [
-             dbc.InputGroupAddon('Boss Armor:', addon_type='prepend'),
+             dbc.InputGroupAddon('敌人护甲', addon_type='prepend'),
              dbc.Input(value=10643, type='number', id='boss_armor')
          ],
-         style={'width': '50%'}
-     ),
-     html.Br(),
-     html.H5('Damage Debuffs'),
-     dbc.Checklist(
+         style={'width': '75%'}
+    ),
+        html.Br(),
+        html.H5('伤害增益Debuff'),
+        dbc.Checklist(
          options=[
-             {'label': 'Gift of Arthas', 'value': 'gift_of_arthas'},
-             {'label': 'Sunder Armor', 'value': 'sunder'},
-             {'label': 'Faerie Fire', 'value': 'faerie_fire'},
              {
-                 'label': 'Blood Frenzy / Savage Combat',
+                 'label': '阿尔萨斯礼物',
+                 'value': 'gift_of_arthas'
+             },
+             {
+                 'label': '破甲',
+                 'value': 'sunder'
+             },
+             {
+                 'label': '精灵火',
+                 'value': 'faerie_fire'
+             },
+             {
+                 'label': '血性狂乱/野蛮战斗',
                  'value': 'blood_frenzy'
              },
          ],
-         value=['gift_of_arthas', 'sunder', 'faerie_fire', 'blood_frenzy'],
+         value=['sunder', 'faerie_fire', 'blood_frenzy'],
          id='boss_debuffs'
-     ),
-     html.Br(),
-     html.H5('Stat Debuffs'),
-     dbc.Checklist(
+    ),
+        dbc.Checklist(
          options=[
              {
-                 'label': 'Heart of the Crusader / Master Poisoner',
+                 'label': '十字军之心/毒物大师',
                  'value': 'jotc'
              },
-             {'label': 'Judgment of Wisdom', 'value': 'jow'},
+             {
+                 'label': '智慧审判',
+                 'value': 'jow'
+             },
          ],
          value=['jotc', 'jow'],
          id='stat_debuffs',
-     ),
-     html.Br(),
-     html.H5('Cooldowns'),
-     dbc.Checklist(
+    ),
+        html.Br(),
+        html.H5('即时技能冷却'),
+        dbc.Checklist(
          options=[
-             {'label': 'Bloodlust', 'value': 'lust'},
-             {'label': 'Dark / Demonic Rune', 'value': 'rune'},
-             {'label': 'Unholy Frenzy', 'value': 'unholy_frenzy'},
-             {'label': 'Shattering Throw', 'value': 'shattering_throw'},
+             {'label': '嗜血/英勇', 'value': 'lust'},
+             {'label': '狂乱', 'value': 'unholy_frenzy'},
+             {'label': '碎裂投掷', 'value': 'shattering_throw'},
          ],
          value=['lust', 'shattering_throw'], id='cooldowns',
-     ),
-     dbc.InputGroup(
+    ),
+        dbc.InputGroup(
          [
-             dbc.InputGroupAddon('Potion CD:', addon_type='prepend'),
+             dbc.InputGroupAddon('药水', addon_type='prepend'),
              dbc.Select(
                  options=[
-                     {'label': 'Potion of Speed', 'value': 'haste'},
-                     {'label': 'None', 'value': 'none'},
+                     {'label': '加速药水', 'value': 'haste'},
+                     {'label': '空', 'value': 'none'},
                  ],
                  value='haste', id='potion',
              ),
          ],
          style={'width': '75%', 'marginTop': '1.5%'}
-     ),
-     html.Br(),
-     html.H5('Talents'),
-     dbc.Checklist(
+    ),
+        html.Br(),
+        html.H5('天赋'),
+        dbc.Checklist(
          options=[
-             {'label': 'Omen of Clarity', 'value': 'omen'},
-             {'label': 'Berserk', 'value': 'berserk'},
-             {'label': 'Primal Gore', 'value': 'primal_gore'},
+             {'label': '清晰预兆', 'value': 'omen'},
+             {'label': '狂暴', 'value': 'berserk'},
+             {'label': '原始血瘀', 'value': 'primal_gore'},
          ],
          value=['omen', 'berserk', 'primal_gore'], id='binary_talents'
-     ),
-     html.Br(),
-     html.Div([
-         html.Div(
-             'Feral Aggression:',
-             style={
+    ),
+        html.Br(),
+        html.Div([
+            html.Div(
+                '野性侵略',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-                 {'label': '4', 'value': 4},
-                 {'label': '5', 'value': 5},
-             ],
-             value='0', id='feral_aggression',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Savage Fury:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                    {'label': '4', 'value': 4},
+                    {'label': '5', 'value': 5},
+                ],
+                value='0', id='feral_aggression',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '野蛮暴怒',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-             ],
-             value=2, id='savage_fury',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Protector of the Pack:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                ],
+                value=2, id='savage_fury',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '强化兽群卫士',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-             ],
-             value=2, id='potp',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Predatory Instincts:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                ],
+                value=2, id='potp',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '狩猎天性',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-             ],
-             value=3, id='predatory_instincts',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Improved Mangle:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                ],
+                value=3, id='predatory_instincts',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '强化裂伤',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-             ],
-             value='0', id='improved_mangle',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Improved Mark of the Wild:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                ],
+                value='0', id='improved_mangle',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '强化野性赐福',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-             ],
-             value=2, id='imp_motw',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Furor:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                ],
+                value=2, id='imp_motw',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '激怒',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-                 {'label': '4', 'value': 4},
-                 {'label': '5', 'value': 5},
-             ],
-             value=5, id='furor',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Naturalist:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                    {'label': '4', 'value': 4},
+                    {'label': '5', 'value': 5},
+                ],
+                value=5, id='furor',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '自然主义',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-                 {'label': '4', 'value': 4},
-                 {'label': '5', 'value': 5},
-             ],
-             value=5, id='naturalist',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Natural Shapeshifter:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                    {'label': '4', 'value': 4},
+                    {'label': '5', 'value': 5},
+                ],
+                value=5, id='naturalist',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '自然变形',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-                 {'label': '3', 'value': 3},
-             ],
-             value=3, id='natural_shapeshifter',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )]),
-     html.Div([
-         html.Div(
-             'Improved Leader of the Pack:',
-             style={
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                    {'label': '3', 'value': 3},
+                ],
+                value=3, id='natural_shapeshifter',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )]),
+        html.Div([
+            html.Div(
+                '强化兽群领袖',
+                style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-             }
-         ),
-         dbc.Select(
-             options=[
-                 {'label': '0', 'value': 0},
-                 {'label': '1', 'value': 1},
-                 {'label': '2', 'value': 2},
-             ],
-             value=2, id='ilotp',
-             style={
-                 'width': '20%', 'display': 'inline-block',
-                 'marginBottom': '2.5%', 'marginRight': '5%'
-             }
-         )])],
+                 }
+            ),
+            dbc.Select(
+                options=[
+                    {'label': '0', 'value': 0},
+                    {'label': '1', 'value': 1},
+                    {'label': '2', 'value': 2},
+                ],
+                value=2, id='ilotp',
+                style={
+                    'width': '20%', 'display': 'inline-block',
+                    'marginBottom': '2.5%', 'marginRight': '5%'
+                }
+            )])],
     width='auto',
     style={
-        'marginLeft': '2.5%', 'marginBottom': '2.5%', 'marginRight': '-2.5%'
+        'marginLeft': '10px', 'marginBottom': '20px'
     }
 )
 
 # Sim replicates input
 iteration_input = dbc.Col([
-    html.H4('Sim Settings'),
+    html.H4('模拟器配置'),
     dbc.InputGroup(
         [
-            dbc.InputGroupAddon('Number of replicates:', addon_type='prepend'),
+            dbc.InputGroupAddon('样本数量', addon_type='prepend'),
             dbc.Input(value=20000, type='number', id='num_replicates')
         ],
-        style={'width': '50%'}
+        style={'width': '100%'}
     ),
     dbc.InputGroup(
         [
-            dbc.InputGroupAddon('Modeled input delay:', addon_type='prepend'),
+            dbc.InputGroupAddon('模拟游戏延迟', addon_type='prepend'),
             dbc.Input(
                 value=100, type='number', id='latency', min=1, step=1,
             ),
             dbc.InputGroupAddon('ms', addon_type='append')
         ],
-        style={'width': '50%'}
+        style={'width': '100%'}
     ),
     html.Br(),
-    html.H5('Player Strategy'),
+    html.H5('输出循环策略'),
     dbc.InputGroup(
         [
             dbc.InputGroupAddon(
-                'Minimum combo points for Rip:', addon_type='prepend'
+                '割裂星', addon_type='prepend'
             ),
             dbc.Select(
                 options=[
@@ -567,12 +591,12 @@ iteration_input = dbc.Col([
                 value=5, id='rip_cp',
             ),
         ],
-        style={'width': '55%', 'marginBottom': '1.5%'}
+        style={'width': '100%', 'marginBottom': '1.5%'}
     ),
     dbc.InputGroup(
         [
             dbc.InputGroupAddon(
-                'Minimum combo points for Ferocious Bite:',
+                '凶猛星',
                 addon_type='prepend'
             ),
             dbc.Select(
@@ -584,43 +608,43 @@ iteration_input = dbc.Col([
                 value=5, id='bite_cp',
             ),
         ],
-        style={'width': '65%', 'marginBottom': '1.5%'}
+        style={'width': '100%', 'marginBottom': '1.5%'}
     ),
     dbc.InputGroup(
         [
-            dbc.InputGroupAddon('Wait', addon_type='prepend'),
+            dbc.InputGroupAddon('等待', addon_type='prepend'),
             dbc.Input(
                 value=0.0, min=0.0, step=0.5, type='number', id='cd_delay',
             ),
             dbc.InputGroupAddon(
-                'seconds before using cooldowns', addon_type='append'
+                '秒后使用技能', addon_type='append'
             ),
         ],
-        style={'width': '63%', 'marginBottom': '1.5%'},
+        style={'width': '100%', 'marginBottom': '1.5%'},
     ),
     dbc.InputGroup(
         [
             dbc.InputGroupAddon(
-                'Targeted offset in Rip/Roar timings:', addon_type='prepend'
+                '保持咆哮和割间隔', addon_type='prepend'
             ),
             dbc.Input(
                 value=14, min=0, step=1, type='number', id='min_roar_offset'
             ),
-            dbc.InputGroupAddon('seconds', addon_type='append')
+            dbc.InputGroupAddon('秒', addon_type='append')
         ],
-        style={'width': '65%'}
+        style={'width': '100%'}
     ),
     html.Br(),
     dbc.Checklist(
-        options=[{'label': ' use Ferocious Bite', 'value': 'bite'}],
-        value=['bite'], id='use_biteweave'
+        options=[{'label': '允许打凶猛', 'value': 'bite'}],
+        value=[], id='use_biteweave'
     ),
     dbc.Collapse(
         [
             dbc.InputGroup(
                 [
                     dbc.InputGroupAddon(
-                        'Maximum Energy for Bite during Berserk:',
+                        '狂暴时打凶猛的最高能量',
                         addon_type='prepend'
                     ),
                     dbc.Input(
@@ -635,12 +659,12 @@ iteration_input = dbc.Col([
             dbc.InputGroup(
                 [
                     dbc.InputGroupAddon(
-                        'Bite usage model:', addon_type='prepend'
+                        '凶猛判定模型', addon_type='prepend'
                     ),
                     dbc.Select(
                         options=[
-                            {'label': 'analytical', 'value': 'analytical'},
-                            {'label': 'empirical', 'value': 'empirical'}
+                            {'label': '智能分析判定', 'value': 'analytical'},
+                            {'label': '固定判定', 'value': 'empirical'}
                         ],
                         value='empirical', id='bite_model'
                     ),
@@ -654,7 +678,7 @@ iteration_input = dbc.Col([
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon(
-                                'Bite with',
+                                '当野蛮咆哮和割裂还剩余',
                                 addon_type='prepend'
                             ),
                             dbc.Input(
@@ -662,7 +686,7 @@ iteration_input = dbc.Col([
                                 min=0, step=1
                             ),
                             dbc.InputGroupAddon(
-                                'seconds left on Rip/Roar', addon_type='append'
+                                '秒时', addon_type='append'
                             )
                         ],
                         style={
@@ -677,16 +701,16 @@ iteration_input = dbc.Col([
         id='biteweave_options', is_open=True
     ),
     dbc.Checklist(
-        options=[{'label': ' use Rake', 'value': 'use_rake'}],
+        options=[{'label': '允许打斜掠', 'value': 'use_rake'}],
         value=['use_rake'], id='use_rake'
     ),
     dbc.Checklist(
-        options=[{'label': ' use Mangle over Shred', 'value': 'mangle_spam'}],
+        options=[{'label': '优先打裂伤', 'value': 'mangle_spam'}],
         value=[], id='mangle_spam'
     ),
     dbc.Checklist(
         options=[{
-            'label': ' Mangle / Trauma maintained by bear tank / Arms warrior',
+            'label': '熊T和武器战负责流血Debuff',
             'value': 'bear_mangle'
         }], value=[], id='bear_mangle'
     ),
@@ -694,7 +718,7 @@ iteration_input = dbc.Col([
         [
             dbc.Checklist(
                 options=[{
-                    'label': ' pre-pop Berserk 1 second before combat starts',
+                    'label': '战斗前提前开狂暴',
                     'value': 'prepop_berserk'
                 }], value=[], id='prepop_berserk'
             ),
@@ -705,7 +729,7 @@ iteration_input = dbc.Col([
         [
             dbc.Checklist(
                 options=[{
-                    'label': ' pre-proc Clearcasting before combat starts',
+                    'label': '战斗前偷清晰',
                     'value': 'preproc_omen'
                 }], value=['preproc_omen'], id='preproc_omen'
             ),
@@ -713,14 +737,14 @@ iteration_input = dbc.Col([
         id='omen_options', is_open=True
     ),
     dbc.Checklist(
-        options=[{'label': ' enable bearweaving', 'value': 'bearweave'}],
+        options=[{'label': '熊猫舞流派', 'value': 'bearweave'}],
         value=['bearweave'], id='bearweave'
     ),
     dbc.Collapse(
         [
             dbc.Checklist(
                 options=[{
-                    'label': ' prioritize Lacerate maintenance over Mangle',
+                    'label': '割伤舞(取消勾选时为裂伤舞)',
                     'value': 'lacerate_prio'
                 }],
                 value=['lacerate_prio'], id='lacerate_prio',
@@ -731,7 +755,7 @@ iteration_input = dbc.Col([
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon(
-                                'Refresh Lacerate with',
+                                '割伤时间小于',
                                 addon_type='prepend'
                             ),
                             dbc.Input(
@@ -739,7 +763,7 @@ iteration_input = dbc.Col([
                                 min=0, step=1
                             ),
                             dbc.InputGroupAddon(
-                                'seconds remaining', addon_type='append'
+                                '秒时允许刷新', addon_type='append'
                             )
                         ],
                         style={
@@ -752,7 +776,7 @@ iteration_input = dbc.Col([
             ),
             dbc.Checklist(
                 options=[{
-                    'label': ' allow bear powershifts when Rage starved',
+                    'label': '允许二次变熊回怒',
                     'value': 'powerbear'
                 }],
                 value=[], id='powerbear',
@@ -760,7 +784,7 @@ iteration_input = dbc.Col([
             ),
             dbc.Checklist(
                 options=[{
-                    'label': ' reset swing timer using Albino Snake',
+                    'label': '平砍重置(换神像/武器/白蛇)',
                     'value': 'snek'
                 }],
                 value=['snek'], id='snek',
@@ -795,7 +819,7 @@ iteration_input = dbc.Col([
         id='flowershift_options', is_open=True
     ),
     html.Br(),
-    html.H5('Trinkets'),
+    html.H5('饰品'),
     dbc.Row([
         dbc.Col(dbc.Select(
             id='trinket_1',
@@ -807,42 +831,28 @@ iteration_input = dbc.Col([
                 {'label': 'Pyrite Infusion', 'value': 'pyrite_infuser'},
                 {'label': 'Wrathstone', 'value': 'wrathstone'},
                 {
-                    'label': 'Darkmoon Card: Greatness (Strength)',
+                    'label': '伟大卡牌(力量)',
                     'value': 'dmcg_str',
                 },
                 {
-                    'label': 'Darkmoon Card: Greatness (Agility)',
+                    'label': '伟大卡牌(敏捷)',
                     'value': 'dmcg_agi',
                 },
-                {'label': 'Grim Toll', 'value': 'grim_toll'},
-                {'label': 'Mirror of Truth', 'value': 'mirror'},
-                {'label': "Loatheb's Shadow", 'value': 'loatheb'},
-                {'label': 'Meteorite Whetstone', 'value': 'whetstone'},
+                {'label': '死亡之钟', 'value': 'grim_toll'},
+                {'label': '真实之镜', 'value': 'mirror'},
+                {'label': "洛欧塞布之影", 'value': 'loatheb'},
+                {'label': '陨星磨石', 'value': 'whetstone'},
                 {
-                    'label': 'Fury of the Five Flights',
+                    'label': '五色巨龙之怒',
                     'value': 'fury_of_the_five_flights',
                 },
-                {'label': 'Incisor Fragment', 'value': 'incisor_fragment'},
-                {'label': 'Mark of Norgannon', 'value': 'norgannon'},
-                {'label': "Sphere of Red Dragon's Blood", 'value': 'sphere'},
-                {'label': 'Extract of Necromantic Power', 'value': 'extract'},
-                {'label': "Bandit's Insignia", 'value': 'bandits_insignia'},
-                {'label': 'Blackened Naaru Sliver', 'value': 'bns'},
-                {'label': 'Darkmoon Card: Death', 'value': 'dmcd'},
-                {'label': 'Tears of Anguish', 'value': 'tears'},
-                {
-                    'label': 'Gnomish Lightning Generator',
-                    'value': 'lightning_generator'
-                },
-                {
-                    'label': "Mighty Alchemist's Stone",
-                    'value': 'mighty_alch'
-                },
-                {'label': "Fezzik's Pocketwatch", 'value': 'fezzik'},
-                {'label': "Berserker's Call", 'value': 'berserkers_call'},
-                {'label': 'Vestige of Haldor', 'value': 'vestige'},
-                {'label': 'Madness of the Betrayer', 'value': 'madness'},
-                {'label': 'Shard of Contempt', 'value': 'shard_of_contempt'},
+                {'label': '门牙碎片', 'value': 'incisor_fragment'},
+                {'label': '诺甘农的印记', 'value': 'norgannon'},
+                {'label': "红龙血珠", 'value': 'sphere'},
+                {'label': '通灵能量精粹', 'value': 'extract'},
+                {'label': "盗匪的徽记", 'value': 'bandits_insignia'},
+                {'label': '死亡卡牌', 'value': 'dmcd'},
+                {'label': '悲苦之泪', 'value': 'tears'}
             ],
             value='dmcg_str'
         )),
@@ -856,55 +866,41 @@ iteration_input = dbc.Col([
                 {'label': 'Pyrite Infusion', 'value': 'pyrite_infuser'},
                 {'label': 'Wrathstone', 'value': 'wrathstone'},
                 {
-                    'label': 'Darkmoon Card: Greatness (Strength)',
+                    'label': '伟大卡牌(力量)',
                     'value': 'dmcg_str',
                 },
                 {
-                    'label': 'Darkmoon Card: Greatness (Agility)',
+                    'label': '伟大卡牌(敏捷)',
                     'value': 'dmcg_agi',
                 },
-                {'label': 'Grim Toll', 'value': 'grim_toll'},
-                {'label': 'Mirror of Truth', 'value': 'mirror'},
-                {'label': "Loatheb's Shadow", 'value': 'loatheb'},
-                {'label': 'Meteorite Whetstone', 'value': 'whetstone'},
+                {'label': '死亡之钟', 'value': 'grim_toll'},
+                {'label': '真实之镜', 'value': 'mirror'},
+                {'label': "洛欧塞布之影", 'value': 'loatheb'},
+                {'label': '陨星磨石', 'value': 'whetstone'},
                 {
-                    'label': 'Fury of the Five Flights',
+                    'label': '五色巨龙之怒',
                     'value': 'fury_of_the_five_flights',
                 },
-                {'label': 'Incisor Fragment', 'value': 'incisor_fragment'},
-                {'label': 'Mark of Norgannon', 'value': 'norgannon'},
-                {'label': "Sphere of Red Dragon's Blood", 'value': 'sphere'},
-                {'label': 'Extract of Necromantic Power', 'value': 'extract'},
-                {'label': "Bandit's Insignia", 'value': 'bandits_insignia'},
-                {'label': 'Blackened Naaru Sliver', 'value': 'bns'},
-                {'label': 'Darkmoon Card: Death', 'value': 'dmcd'},
-                {'label': 'Tears of Anguish', 'value': 'tears'},
-                {
-                    'label': 'Gnomish Lightning Generator',
-                    'value': 'lightning_generator'
-                },
-                {
-                    'label': "Mighty Alchemist's Stone",
-                    'value': 'mighty_alch'
-                },
-                {'label': "Fezzik's Pocketwatch", 'value': 'fezzik'},
-                {'label': "Berserker's Call", 'value': 'berserkers_call'},
-                {'label': 'Vestige of Haldor', 'value': 'vestige'},
-                {'label': 'Madness of the Betrayer', 'value': 'madness'},
-                {'label': 'Shard of Contempt', 'value': 'shard_of_contempt'},
+                {'label': '门牙碎片', 'value': 'incisor_fragment'},
+                {'label': '诺甘农的印记', 'value': 'norgannon'},
+                {'label': "红龙血珠", 'value': 'sphere'},
+                {'label': '通灵能量精粹', 'value': 'extract'},
+                {'label': "盗匪的徽记", 'value': 'bandits_insignia'},
+                {'label': '死亡卡牌', 'value': 'dmcd'},
+                {'label': '悲苦之泪', 'value': 'tears'}
             ],
             value='grim_toll'
         )),
     ]),
     html.Div(
-        'Make sure not to include passive trinket stats in the sim input.',
+        '*确保你的配装文件里没有选神像和饰品,不然属性会错',
         style={
             'marginTop': '2.5%', 'fontSize': 'large', 'fontWeight': 'bold'
         },
     ),
     html.Div([
         dbc.Button(
-            "Run", id='run_button', n_clicks=0, size='lg', color='success',
+            "计算DPS", id='run_button', n_clicks=0, size='lg', color='success',
             style={
                 'marginBottom': '10%', 'fontSize': 'large', 'marginTop': '10%',
                 'display': 'inline-block'
@@ -919,24 +915,32 @@ iteration_input = dbc.Col([
         )
     ]),
     dcc.Interval(id='interval', interval=500),
-], width='auto', style={'marginBottom': '2.5%', 'marginLeft': '2.5%'})
+], width='auto', style={'marginBottom': '20px', 'marginLeft': '10px'})
 
 input_layout = html.Div(children=[
     html.H1(
-        children='WoW Classic WotLK Feral Cat Simulator',
+        children='WLK猫德模拟器 v1.5',
         style={'textAlign': 'center'}
+    ),
+    html.H5(
+        children='Nerdegghead授权 范克瑞斯Espeon翻译/编译',
+        style={'textAlign': 'center', "color": 'yellow'}
+    ),
+    html.H5(
+        children='更新于2022.11.10,支持P2模拟/神像舞/爪子舞',
+        style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
         [stat_input, buffs_1, encounter_details, iteration_input],
-        style={'marginTop': '2.5%'}
+        style={'marginTop': '30px', 'marginBottom': '30px'}
     ),
 ])
 
 stats_output = dbc.Col(
-    [html.H4('Raid Buffed Stats'),
+    [html.H4('Buff后属性'),
      html.Div([
          html.Div(
-             'Swing Timer:',
+             '平砍速度',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -949,7 +953,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Attack Power:',
+             '攻强',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -962,7 +966,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Boss Crit Chance:',
+             '暴击',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -975,7 +979,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Boss Miss Chance:',
+             '未命中率',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -988,7 +992,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Mana:',
+             '蓝量',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -1001,7 +1005,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Intellect:',
+             '智力',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -1014,7 +1018,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'Spirit:',
+             '精神',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -1027,7 +1031,7 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             'MP5:',
+             'MP5',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -1042,10 +1046,10 @@ stats_output = dbc.Col(
 )
 
 sim_output = dbc.Col([
-    html.H4('Results'),
+    html.H4('模拟结果'),
     dcc.Loading(children=html.Div([
         html.Div(
-            'Average DPS:',
+            'DPS范围',
             style={
                 'width': '50%', 'display': 'inline-block',
                 'fontWeight': 'bold', 'fontSize': 'large'
@@ -1061,7 +1065,7 @@ sim_output = dbc.Col([
     ]), id='loading_1', type='default'),
     dcc.Loading(children=html.Div([
         html.Div(
-            'Median DPS:',
+            '中位数DPS',
             style={
                 'width': '50%', 'display': 'inline-block',
                 'fontWeight': 'bold', 'fontSize': 'large'
@@ -1077,7 +1081,7 @@ sim_output = dbc.Col([
     ]), id='loading_2', type='default'),
     dcc.Loading(children=html.Div([
         html.Div(
-            'Time to oom:',
+            '空蓝时间',
             style={
                 'width': '50%', 'display': 'inline-block',
                 'fontWeight': 'bold', 'fontSize': 'large'
@@ -1092,20 +1096,20 @@ sim_output = dbc.Col([
         ),
     ]), id='loading_oom_time', type='default'),
     html.Br(),
-    html.H5('DPS Breakdown'),
+    html.H5('DPS占比'),
     dcc.Loading(children=dbc.Table([
         html.Thead(html.Tr([
-            html.Th('Ability'), html.Th('Number of Casts'), html.Th('CPM'),
-            html.Th('Damage per Cast'), html.Th('DPS Contribution')
+            html.Th('技能'), html.Th('施法次数'), html.Th('CPM'),
+            html.Th('平均伤害'), html.Th('DPS占比')
         ])),
         html.Tbody(id='dps_breakdown_table')
     ]), id='loading_3', type='default'),
     html.Br(),
-    html.H5('Aura Statistics'),
+    html.H5('触发数据'),
     dcc.Loading(children=dbc.Table([
         html.Thead(html.Tr([
-            html.Th('Aura Name'), html.Th('Number of Procs'),
-            html.Th('Average Uptime'),
+            html.Th('触发类型'), html.Th('触发次数'),
+            html.Th('触发覆盖'),
         ])),
         html.Tbody(id='aura_breakdown_table')
     ]), id='loading_auras', type='default'),
@@ -1114,12 +1118,12 @@ sim_output = dbc.Col([
 ], style={'marginLeft': '2.5%', 'marginBottom': '2.5%'}, width=4, xl=3)
 
 weights_section = dbc.Col([
-    html.H4('Stat Weights'),
+    html.H4('属性权重分析'),
     html.Div([
         dbc.Row(
             [
                 dbc.Col(dbc.Button(
-                    'Calculate Weights', id='weight_button', n_clicks=0,
+                    '计算属性权重', id='weight_button', n_clicks=0,
                     color='info'
                 ), width='auto'),
                 dbc.Col(
@@ -1131,7 +1135,7 @@ weights_section = dbc.Col([
                                     className='form-check-input', checked=False
                                 ),
                                 dbc.Label(
-                                    'Assume Epic gems',
+                                    '史诗宝石',
                                     html_for='epic_gems',
                                     className='form-check-label'
                                 )
@@ -1144,7 +1148,7 @@ weights_section = dbc.Col([
             ]
         ),
         html.Div(
-            'Calculation will take several minutes.',
+            '计算权重会花很多时间,点击前请注意!',
             style={'fontWeight': 'bold'},
         ),
         dcc.Loading(
@@ -1156,8 +1160,7 @@ weights_section = dbc.Col([
                             id='error_str'
                         ),
                         html.Span(
-                            'Stat weight calculation requires the simulation '
-                            'to be run with at least 20,000 replicates.',
+                            '你至少需要20000次样本才能计算权重,请修改你的样本数量',
                             style={'fontSize': 'large'}, id='error_msg'
                         )
                     ],
@@ -1172,7 +1175,7 @@ weights_section = dbc.Col([
                 ]),
                 html.Div(
                     html.A(
-                        'Seventy Upgrades Import Link',
+                        'Seventy Upgrades 导出权重',
                         href='https://seventyupgrades.com', target='_blank'
                     ),
                     id='import_link'
@@ -1192,7 +1195,7 @@ graph_section = html.Div([
         [
             dbc.Col(
                 dbc.Button(
-                    "Generate Example", id='graph_button', n_clicks=0,
+                    "生成输出循环报告", id='graph_button', n_clicks=0,
                     color='info',
                     style={'marginLeft': '2.5%', 'fontSize': 'large'}
                 ),
@@ -1205,7 +1208,7 @@ graph_section = html.Div([
                             id='show_whites', className='form-check-input'
                         ),
                         dbc.Label(
-                            'Show white damage', html_for='show_whites',
+                            '显示平砍', html_for='show_whites',
                             className='form-check-label'
                         )
                     ],
@@ -1216,18 +1219,18 @@ graph_section = html.Div([
         ]
     ),
     html.H4(
-        'Example of energy flow in a fight', style={'textAlign': 'center'}
+        '战斗能量变化', style={'textAlign': 'center'}
     ),
     dcc.Graph(id='energy_flow'),
     html.Br(),
     dbc.Col(
         [
-            html.H5('Combat Log'),
+            html.H5('施法顺序'),
             dbc.Table([
                 html.Thead(html.Tr([
-                    html.Th('Time'), html.Th('Event'), html.Th('Outcome'),
-                    html.Th('Energy'), html.Th('Combo Points'),
-                    html.Th('Mana'), html.Th('Rage')
+                    html.Th('时间戳'), html.Th('技能'), html.Th('状态'),
+                    html.Th('能量值'), html.Th('星'),
+                    html.Th('蓝量'), html.Th('怒气')
                 ])),
                 html.Tbody(id='combat_log')
             ])
@@ -1745,7 +1748,7 @@ def compute(
 
     if json_file is None:
         upload_output = (
-            'No file uploaded, using default input stats instead.',
+            '没有选择文件,正在使用默认属性',
             {'color': '#E59F3A', 'width': 300}, True
         )
     else:
@@ -1761,9 +1764,7 @@ def compute(
 
             if not catform_checked:
                 upload_output = (
-                    'Error processing input file! "Cat Form" was not checked '
-                    'in the export pop-up window. Using default input stats '
-                    'instead.',
+                    '文件错误,确保你导出时选择了Cat Form',
                     {'color': '#D35845', 'width': 300}, True
                 )
             elif buffs_present:
@@ -1775,31 +1776,24 @@ def compute(
 
                 if pot_present:
                     upload_output = (
-                        'Error processing input file! Potions should not be '
-                        'checked in the Seventy Upgrades buff tab, as they are'
-                        ' temporary rather than permanent stat buffs. Using'
-                        ' default input stats instead.',
+                        '文件错误,确保你没有选择药水',
                         {'color': '#D35845', 'width': 300}, True
                     )
                 else:
                     upload_output = (
-                        'Upload successful. Buffs detected in Seventy Upgrades'
-                        ' export, so the "Consumables" and "Raid Buffs" '
-                        'sections in the sim input will be ignored.',
+                        '文件导入成功,你选择的Buff和药水也会被导入',
                         {'color': '#5AB88F', 'width': 300}, False
                     )
                     use_default_inputs = False
             else:
                 upload_output = (
-                    'Upload successful. No buffs detected in Seventy Upgrades '
-                    'export, so use the  "Consumables" and "Raid Buffs" '
-                    'sections in the sim input for buff entry.',
+                    '文件导入成功,在模拟器里选择药水和Buff',
                     {'color': '#5AB88F', 'width': 300}, True
                 )
                 use_default_inputs = False
         except Exception:
             upload_output = (
-                'Error processing input file! Using default input stats '
+                '文件错误!正在使用默认属性'
                 'instead.',
                 {'color': '#D35845', 'width': 300}, True
             )
@@ -1843,7 +1837,7 @@ def compute(
         input_stats['crit'], input_stats.get('weaponDamage', 0),
         input_stats.get('hasteRating', 0),
         input_stats.get('expertiseRating', 0),
-        input_stats.get('armorPenRating', 0),input_stats['mana'],
+        input_stats.get('armorPenRating', 0), input_stats['mana'],
         input_stats['intellect'], input_stats['spirit'],
         input_stats.get('mp5', 0), float(input_stats['mainHandSpeed']),
         unleashed_rage, kings, raven_idol, other_buffs, stat_debuffs,
@@ -2041,7 +2035,7 @@ def disable_options(
     bearweave, flowershift, biteweave, bite_model, lacerate_prio,
     binary_talents
 ):
-    bearweave_options = {'label': ' enable bearweaving', 'value': 'bearweave'}
+    bearweave_options = {'label': '熊猫舞流派', 'value': 'bearweave'}
     flowershift_options = {
         'label': ' enable flowershifting', 'value': 'flowershift'
     }
@@ -2062,5 +2056,5 @@ def disable_options(
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     app.run_server(
-        host='0.0.0.0', port=8080, debug=True
+        host='0.0.0.0', port=8080, debug=False
     )
