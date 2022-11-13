@@ -811,7 +811,7 @@ iteration_input = dbc.Col([
                     )
                 ],
                 style={
-                    'width': '70%', 'marginBottom': '1%', 'marginLeft': '5%',
+                    'width': '90%', 'marginBottom': '1%', 'marginLeft': '5%',
                     'marginTop': '1%',
                 }
             ),
@@ -837,7 +837,7 @@ iteration_input = dbc.Col([
                             ),
                         ],
                         style={
-                            'width': '70%', 'marginBottom': '1%',
+                            'width': '90%', 'marginBottom': '1%',
                             'marginLeft': '5%', 'marginTop': '1%',
                         }
                     ),
@@ -1146,7 +1146,7 @@ sim_output = dbc.Col([
 ], style={'marginLeft': '2.5%', 'marginBottom': '2.5%'}, width=4, xl=3)
 
 weights_section = dbc.Col([
-    html.H4('属性权重分析'),
+    html.H4('属性权重分析(>2万样本,10万最佳)'),
     html.Div([
         dbc.Row(
             [
