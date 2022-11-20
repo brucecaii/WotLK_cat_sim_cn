@@ -397,15 +397,16 @@ class Simulation():
 
         # If Idol swapping is configured, then swap to Shred Idol immmediately
         # after Rip is cast. This incurs a 0.5 second GCD extension as well as
-        # a swing timer reset.
-        # if self.strategy['idol_swap'] and (self.player.rip_bonus > 0):
-        #     self.player.shred_bonus = self.shred_bonus
-        #     self.player.rip_bonus = 0
-        #     self.player.calc_damage_params(**self.params)
-        #     self.player.gcd = 1.5
-        #     self.update_swing_times(
-        #         time + self.swing_timer, self.swing_timer, first_swing=True
-        #     )
+        # a swing timer reset, so it should only be done during Berserk.
+        if (self.strategy['idol_swap'] and (self.player.rip_bonus > 0)
+                and self.player.berserk):
+            self.player.shred_bonus = self.shred_bonus
+            self.player.rip_bonus = 0
+            self.player.calc_damage_params(**self.params)
+            self.player.gcd = 1.5
+            self.update_swing_times(
+                time + self.swing_timer, self.swing_timer, first_swing=True
+            )
 
         return 0.0
 
@@ -684,7 +685,7 @@ class Simulation():
             return False
 
         # Project Rip end time assuming full Glyph of Shred extensions.
-        max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph + 8 * self.player.t8_4p_bonus
+        max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph
         rip_end = self.rip_start + max_rip_dur
 
         # If the existing Roar already falls off well after the existing Roar,
@@ -694,7 +695,7 @@ class Simulation():
             return False
 
         # Calculate when Roar would end if we cast it now.
-        new_roar_dur = self.player.roar_durations[self.player.combo_points]
+        new_roar_dur = self.player.roar_durations[self.player.combo_points] + 8 * self.player.t8_4p_bonus
         new_roar_end = time + new_roar_dur
 
         # Clip as soon as we have enough CPs for the new Roar to expire well
@@ -948,6 +949,10 @@ class Simulation():
         if self.player.furor > 3:
             weave_energy -= 15
 
+            # Force a 3-GCD weave when stacking Lacerates for the first time
+            if self.strategy['lacerate_prio'] and (not self.lacerate_debuff):
+                weave_energy -= 15
+
             # Remove the 2-GCD leeway restriction in situations where the Rip
             # and Lacerate timers are synced
             # weave_early = (
@@ -1191,8 +1196,10 @@ class Simulation():
                 and (self.lacerate_end - 1.5 - self.latency <= next_cast_end)
             )
 
-            if ignore_pooling and (energy >= self.player.shred_cost):
-                return self.shred()
+            if ignore_pooling:
+                if energy >= self.player.shred_cost:
+                    return self.shred()
+                time_to_next_action = (self.player.shred_cost - energy) / 10.
 
         # Model in latency when waiting on Energy for our next action
         next_action = time + time_to_next_action
@@ -1471,10 +1478,10 @@ class Simulation():
         if self.strategy['preproc_omen'] and self.player.omen:
             self.player.omen_proc = True
 
-        # If Idol swapping, then start fight with Shred Idol equipped
+        # If Idol swapping, then start fight with Rip Idol equipped
         if self.strategy['idol_swap']:
-            self.player.shred_bonus = self.shred_bonus
-            self.player.rip_bonus = 0
+            self.player.shred_bonus = 0
+            self.player.rip_bonus = self.rip_bonus
             self.player.calc_damage_params(**self.params)
 
         # Create placeholder for time to OOM if the player goes OOM in the run
@@ -1750,6 +1757,18 @@ class Simulation():
                 and (self.player.tf_cd < 1e-9) and (not self.player.berserk)
                 and self.player.cat_form
             )
+
+            # If Lacerateweaving, then delay Tiger's Fury if Lacerate is due to
+            # expire within 3 GCDs (two cat specials + shapeshift), since we
+            # won't be able to spend down our Energy fast enough to avoid
+            # Energy capping otherwise.
+            if self.strategy['bearweave'] and self.strategy['lacerate_prio']:
+                next_possible_lac = time + leeway_time + 3.5 + self.latency
+                tf_now = tf_now and (
+                    (not self.lacerate_debuff)
+                    or (self.lacerate_end > next_possible_lac)
+                    or (self.lacerate_end > self.fight_length)
+                )
 
             if tf_now:
                 # If Berserk is available, then pool to 30 Energy before
