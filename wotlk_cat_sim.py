@@ -674,10 +674,8 @@ class Simulation():
     def clip_roar(self, time):
         """Determine whether to clip a currently active Savage Roar in order to
         de-sync the Rip and Roar timers.
-
         Arguments:
             time (float): Current simulation time in seconds.
-
         Returns:
             can_roar (bool): Whether or not to clip Roar now.
         """
@@ -702,7 +700,7 @@ class Simulation():
         # after the current Rip.
         return (new_roar_end >= rip_end + self.strategy['min_roar_offset'])
 
-    # def clip_roar(self, time):
+    # def clip_roar_experimental(self, time):
     #     """Determine whether to clip a currently active Savage Roar in order to
     #     de-sync the Rip and Roar timers.
 
@@ -712,54 +710,51 @@ class Simulation():
     #     Returns:
     #         can_roar (bool): Whether or not to clip Roar now.
     #     """
-    #     # For now, consider only the case where Rip will expire after Roar
-    #     if ((not self.rip_debuff) or (self.rip_end <= self.roar_end)
-    #             or (self.fight_length - self.rip_end < 10)):
+    #     # If existing Roar already covers the rest of the fight, don't clip.
+    #     if self.roar_end >= self.fight_length:
     #         return False
 
-    #     # Calculate how much Energy we expect to accumulate after Roar expires
-    #     # but before Rip expires.
-    #     maxripdur = self.player.rip_duration + 6 * self.player.shred_glyph
-    #     ripdur = self.rip_start + maxripdur - time
-    #     roardur = self.roar_end - time
-    #     available_time = ripdur - roardur
-    #     expected_energy_gain = 10 * available_time
-
-    #     if self.tf_expected_before(time, self.rip_end):
-    #         expected_energy_gain += 60
-    #     if self.player.omen:
-    #         expected_energy_gain += available_time / self.swing_timer * (
-    #             3.5 / 60. * (1 - self.player.miss_chance) * 42
-    #         )
-    #     if self.player.omen_proc:
-    #         expected_energy_gain += 42
-
-    #     expected_energy_gain += (
-    #         available_time / self.revitalize_frequency * 0.15 * 8
-    #     )
-
-    #     # Add current Energy minus cost of Roaring now
-    #     roarcost = 12.5 if self.player.berserk else 25
-    #     available_energy = self.player.energy - roarcost + expected_energy_gain
-
-    #     # Now calculate the effective Energy cost for building back 5 CPs once
-    #     # Roar expires and casting Rip
-    #     ripcost = 15 if self.berserk_expected_at(time, self.rip_end) else 30
-    #     cp_per_builder = 1 + self.player.crit_chance
-    #     cost_per_builder = (
-    #         (42. + 42. + 35.) / 3. * (1 + 0.2 * self.player.miss_chance)
-    #     )
-    #     rip_refresh_cost = 5. / cp_per_builder * cost_per_builder + ripcost
-
-    #     # If the cost is less than the expected Energy gain in the available
-    #     # time, then there's no reason to clip Roar.
-    #     if available_energy >= rip_refresh_cost:
+    #     # If Rip isn't currently up, then also don't clip so we can get it up.
+    #     if (not self.rip_debuff):
     #         return False
 
-    #     # On the other hand, if there is a time conflict, then use the
-    #     # empirical parameter for how much we're willing to clip Roar.
-    #     return roardur <= self.strategy['max_roar_clip']
-    #     # return True
+    #     # Project Rip end time assuming full Glyph of Shred extensions.
+    #     max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph
+    #     rip_end = self.rip_start + max_rip_dur
+
+    #     # Calculate when Roar would end if we cast it now.
+    #     new_roar_dur = (
+    #         self.player.roar_durations[self.player.combo_points]
+    #         + 8 * self.player.t8_4p_bonus
+    #     )
+    #     new_roar_end = time + new_roar_dur
+
+    #     # If the existing Roar already falls off after the existing Rip, then
+    #     # we shouldn't clip in order to maximize CP generation leeway for the
+    #     # Rip refresh. The only exception to this is if the existing Rip will
+    #     # be the last one of the fight AND the new Roar will be the last one of
+    #     # the fight.
+    #     if self.roar_end > rip_end:
+    #         return False
+    #         # return (
+    #         #     (new_roar_end >= self.fight_length)
+    #         #     and (self.fight_length - rip_end < 10)
+    #         # )
+
+    #     # If clipping Roar now will cover us for the rest of the fight, then do
+    #     # it so we can start generating CPs for end-of-fight Bites.
+    #     if new_roar_end >= self.fight_length:
+    #         return True
+
+    #     # Finally, we handle the interesting conflict scenario of clipping to
+    #     # desync the Rip and Roar timers. First exclude end-of-fight conflicts
+    #     # since we won't be refreshing Rip at all in those cases.
+    #     if self.fight_length - rip_end < 10:
+    #         return False
+
+    #     # Clip as soon as we have enough CPs for the new Roar to expire well
+    #     # after the current Rip.
+    #     return (new_roar_end >= rip_end + self.strategy['min_roar_offset'])
 
     def execute_rotation(self, time):
         """Execute the next player action in the DPS rotation according to the
@@ -895,12 +890,31 @@ class Simulation():
             and (not self.player.omen_proc)
         )
 
-        berserk_energy_thresh = 90 - 10 * self.player.omen_proc
+        # Berserk algorithm: time Berserk for just after a Tiger's Fury
+        # *unless* we'll lose Berserk uptime by waiting for Tiger's Fury to
+        # come off cooldown. The latter exception is necessary for
+        # Lacerateweave rotation since TF timings can drift over time.
+        berserk_dur = 15 + 5 * self.player.berserk_glyph
+        wait_for_tf = (
+            (self.player.tf_cd <= berserk_dur) and
+            (time + self.player.tf_cd + 1.0 < self.fight_length - berserk_dur)
+        )
         berserk_now = (
             self.strategy['use_berserk'] and (self.player.berserk_cd < 1e-9)
-            and (self.player.tf_cd > 15 + 5 * self.player.berserk_glyph)
-            # and (energy < berserk_energy_thresh + 1e-9)
+            and (not wait_for_tf)
         )
+
+        # Additionally, for Lacerateweave rotation, postpone the final Berserk
+        # of the fight to as late as possible so as to minimize the impact of
+        # dropping Lacerate stacks during the Berserk window. Rationale for the
+        # 3 second additional leeway given beyond just berserk_dur in the below
+        # expression is to be able to fit in a final TF and dump the Energy
+        # from it in cases where Berserk and TF CDs are desynced due to drift.
+        if (berserk_now and self.strategy['bearweave']
+                and self.strategy['lacerate_prio']
+                and (self.max_berserk_uses > 1)
+                and (self.num_berserk_uses == self.max_berserk_uses - 1)):
+            berserk_now = (self.fight_length - time < berserk_dur + 3.0)
 
         # roar_now = (not self.player.savage_roar) and (cp >= 1)
         # pool_for_roar = (not roar_now) and (cp >= 1) and self.clip_roar(time)
@@ -985,6 +999,16 @@ class Simulation():
         if bearweave_now and (not self.strategy['lacerate_prio']):
             bearweave_now = not self.tf_expected_before(time, weave_end)
 
+        # Also add an end of fight condition to make sure we can spend down our
+        # Energy post-bearweave before the encounter ends. Time to spend is
+        # given by weave_end plus 1 second per 42 Energy that we have at
+        # weave_end.
+        if bearweave_now:
+            energy_to_dump = energy + (weave_end - time) * 10
+            bearweave_now = (
+                weave_end + energy_to_dump // 42 < self.fight_length
+            )
+
         # If we're maintaining Lacerate, then allow for emergency bearweaves
         # if Lacerate is about to fall off even if the above conditions do not
         # apply.
@@ -993,6 +1017,7 @@ class Simulation():
             and self.lacerate_debuff
             and (self.lacerate_end - time < 2.5 + self.latency)
             and (self.lacerate_end < self.fight_length)
+            and (not self.player.berserk)
         )
 
         # As an alternative to bearweaving, cast GotW on the raid under
@@ -1010,6 +1035,16 @@ class Simulation():
             and (not self.player.berserk)
             and (not self.tf_expected_before(time, flower_end))
         )
+
+        # Also add an end of fight condition to make sure we can spend down our
+        # Energy post-flowershift before the encounter ends. Time to spend is
+        # given by flower_end plus 1 second for Clearcast Shred plus 1 second
+        # per 42 Energy that we have after that Clearcast Shred.
+        if flowershift_now:
+            energy_to_dump = energy + (flower_end + 1.0 - time) * 10
+            flowershift_now = (
+                flower_end + 1.0 + energy_to_dump // 42 < self.fight_length
+            )
 
         floating_energy = 0
         previous_time = time
@@ -1053,10 +1088,12 @@ class Simulation():
             shift_now = (
                 (energy + 15 + 10 * self.latency > furor_cap)
                 or (rip_refresh_pending and (self.rip_end < time + 3.0))
+                or self.player.berserk
             )
             shift_next = (
                 (energy + 30 + 10 * self.latency > furor_cap)
                 or (rip_refresh_pending and (self.rip_end < time + 4.5))
+                or self.player.berserk
             )
 
             if self.strategy['powerbear']:
@@ -1089,6 +1126,13 @@ class Simulation():
 
             if (not self.strategy['lacerate_prio']) or (not lacerate_now):
                 shift_now = shift_now or self.player.omen_proc
+
+            # Also add an end of fight condition to prevent extending a weave
+            # if we don't have enough time to spend the pooled Energy thus far.
+            if not shift_now:
+                energy_to_dump = energy + 30 + 10 * self.latency
+                time_to_dump = 3.0 + self.latency + energy_to_dump // 42
+                shift_now = (time + time_to_dump >= self.fight_length)
 
             if emergency_lacerate and (self.player.rage >= 13):
                 return self.lacerate(time)
@@ -1218,9 +1262,9 @@ class Simulation():
         if (self.strategy['bearweave'] and self.strategy['lacerate_prio']
                 and self.lacerate_debuff
                 and (self.lacerate_end < self.fight_length)
-                and (time < self.lacerate_end - 1.5 - 2 * self.latency)):
+                and (time < self.lacerate_end - 1.5 - 3 * self.latency)):
             next_action = min(
-                next_action, self.lacerate_end - 1.5 - 2 * self.latency
+                next_action, self.lacerate_end - 1.5 - 3 * self.latency
             )
 
         self.next_action = next_action + self.latency
@@ -1328,6 +1372,7 @@ class Simulation():
         self.player.gcd = 1.0 * (not prepop)
         self.berserk_end = time + 15. + 5 * self.player.berserk_glyph
         self.player.berserk_cd = 180. - prepop
+        self.num_berserk_uses += 1
 
         if self.log:
             self.combat_log.append(
@@ -1458,11 +1503,15 @@ class Simulation():
         # Reset all trinkets to fresh state
         self.proc_end_times = []
 
+        for trinket in self.trinkets:
+            trinket.reset()
+
         # Track 2pT8 icd end time
         self.t8_2p_icd = 0
 
-        for trinket in self.trinkets:
-            trinket.reset()
+        # Calculate maximum Berserk cooldown uses for given fight length
+        self.max_berserk_uses = 1 + int((self.fight_length - 4.0) // 180)
+        self.num_berserk_uses = 0
 
         # If a bear tank is providing Mangle uptime for us, then flag the
         # debuff as permanently on.
