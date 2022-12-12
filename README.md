@@ -8,6 +8,10 @@
 
 Github https://github.com/eeveecc/WotLK_cat_sim_cn
 
+## 使用教程
+
+打开exe文件,命令行出现后在浏览器里浏览localhost:8080或者127.0.0.1:8080
+
 ## Release Note
 
 ```
