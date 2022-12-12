@@ -237,7 +237,7 @@ buffs_1 = dbc.Col(
         ],
         value=[
             'shred_idol', 'rip_idol', 'rip_glyph', 'shred_glyph', 'roar_glyph',
-            't7_2p', 'meta', 'berserking', 'engi_gloves'
+            't8_2p', 'meta', 'berserking', 'engi_gloves'
         ],
         id='bonuses'
     ),
@@ -634,10 +634,16 @@ iteration_input = dbc.Col([
         ],
         style={'width': '100%'}
     ),
+    html.Div(
+        '*熊猫舞最佳为14,爪凶流为13',
+        style={
+            'marginTop': '2.5%', 'fontSize': 'medium', 'fontWeight': 'bold'
+        },
+    ),
     html.Br(),
     dbc.Checklist(
         options=[{'label': '允许打凶猛', 'value': 'bite'}],
-        value=[], id='use_biteweave'
+        value=['bite'], id='use_biteweave'
     ),
     dbc.Collapse(
         [
@@ -686,7 +692,7 @@ iteration_input = dbc.Col([
                                 min=0, step=1
                             ),
                             dbc.InputGroupAddon(
-                                '秒时', addon_type='append'
+                                '秒时(熊猫舞10秒最佳,爪凶流3秒)', addon_type='append'
                             )
                         ],
                         style={
@@ -705,7 +711,7 @@ iteration_input = dbc.Col([
         value=['use_rake'], id='use_rake'
     ),
     dbc.Checklist(
-        options=[{'label': '优先打裂伤', 'value': 'mangle_spam'}],
+        options=[{'label': '优先打裂伤(正面攻击)', 'value': 'mangle_spam'}],
         value=[], id='mangle_spam'
     ),
     dbc.Checklist(
@@ -882,7 +888,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='dmcg_str'
+            value='comet_trail'
         )),
         dbc.Col(dbc.Select(
             id='trinket_2',
@@ -917,7 +923,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='grim_toll'
+            value='mjolnir_runestone'
         )),
     ]),
     html.Div(
@@ -947,7 +953,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v1.5',
+        children='Nerd Ecat Sims WLK猫德模拟器 v2.0',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -955,7 +961,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='更新于2022.11.10,支持P2模拟/神像舞/爪子舞',
+        children='更新于2022.12.12 P2奥杜尔版本',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
