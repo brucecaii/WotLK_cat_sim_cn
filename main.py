@@ -115,8 +115,9 @@ buffs_1 = dbc.Col(
          options=[{'label': '无尽怒气合剂(180AP)', 'value': 'flask'},
                   {'label': '钳鱼大餐/生拌狼肉糜(40命中)', 'value': 'hit_food'},
                   {'label': '熏烤龙鳞鱼(40敏捷)', 'value': 'agi_food'},
-                  {'label': '龙鳞鱼片(40力量)', 'value': 'str_food'}],
-         value=['flask', 'str_food'],
+                  {'label': '龙鳞鱼片(40力量)', 'value': 'str_food'},
+                  {'label': '犀牛大餐(40破甲)', 'value': 'arp_food'}],
+         value=['flask', 'arp_food'],
          id='consumables'
     ),
         html.Br(),
