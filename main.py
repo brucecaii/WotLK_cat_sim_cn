@@ -25,36 +25,36 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 default_input_stats = {
-    "agility": 977,
-    "armor": 5468,
-    "armorPen": 12.28,
-    "armorPenRating": 172,
-    "attackPower": 7360,
-    "crit": 46.62,
-    "critRating": 570,
-    "critReduction": 6,
-    "defense": 400,
-    "dodge": 30,
-    "expertise": 23,
-    "expertiseRating": 113,
-    "feralAttackPower": 2353,
-    "haste": 12.61,
-    "hasteRating": 318,
-    "health": 19527,
-    "hit": 5.25,
-    "hitRating": 172,
-    "intellect": 211,
-    "mainHandSpeed": 2.4,
-    "mana": 6381,
-    "natureResist": 10,
-    "parry": 5,
-    "spellCrit": 15.53,
-    "spellCritRating": 570,
-    "spellHaste": 9.7,
-    "spellHit": 6.56,
-    "spirit": 193,
-    "stamina": 1229,
-    "strength": 234
+        "agility": 1456,
+        "armor": 6675,
+        "armorPen": 43,
+        "armorPenRating": 602,
+        "attackPower": 8543,
+        "crit": 53.34,
+        "critRating": 615,
+        "critReduction": 6,
+        "defense": 400,
+        "dodge": 40,
+        "expertise": 25,
+        "expertiseRating": 126,
+        "feralAttackPower": 3001,
+        "haste": 10.94,
+        "hasteRating": 276,
+        "health": 21517,
+        "hit": 6.89,
+        "hitRating": 226,
+        "intellect": 206,
+        "mainHandSpeed": 2.4,
+        "mana": 6306,
+        "natureResist": 10,
+        "parry": 5,
+        "spellCrit": 16.48,
+        "spellCritRating": 615,
+        "spellHaste": 8.42,
+        "spellHit": 8.62,
+        "spirit": 189,
+        "stamina": 1428,
+        "strength": 251
 }
 
 stat_input = dbc.Col([
@@ -251,7 +251,7 @@ encounter_details = dbc.Col(
          [
              dbc.InputGroupAddon('时长', addon_type='prepend'),
              dbc.Input(
-                 value=120.0, type='number', id='fight_length',
+                 value=180.0, type='number', id='fight_length',
              ),
              dbc.InputGroupAddon('秒', addon_type='append')
          ],
@@ -561,7 +561,7 @@ iteration_input = dbc.Col([
     dbc.InputGroup(
         [
             dbc.InputGroupAddon('样本数量', addon_type='prepend'),
-            dbc.Input(value=20000, type='number', id='num_replicates')
+            dbc.Input(value=67000, type='number', id='num_replicates')
         ],
         style={'width': '100%'}
     ),
@@ -628,7 +628,7 @@ iteration_input = dbc.Col([
                 '保持咆哮和割间隔', addon_type='prepend'
             ),
             dbc.Input(
-                value=14, min=0, step=1, type='number', id='min_roar_offset'
+                value=12, min=0, step=1, type='number', id='min_roar_offset'
             ),
             dbc.InputGroupAddon('秒', addon_type='append')
         ],
@@ -654,7 +654,7 @@ iteration_input = dbc.Col([
                         addon_type='prepend'
                     ),
                     dbc.Input(
-                        value=30, min=18, step=1, type='number',
+                        value=25, min=18, step=1, type='number',
                         id='berserk_bite_thresh'
                     )
                 ],
@@ -765,7 +765,7 @@ iteration_input = dbc.Col([
                                 addon_type='prepend'
                             ),
                             dbc.Input(
-                                type='number', value=10, id='lacerate_time',
+                                type='number', value=8, id='lacerate_time',
                                 min=0, step=1
                             ),
                             dbc.InputGroupAddon(
@@ -864,41 +864,7 @@ iteration_input = dbc.Col([
                 {'label': '黑暗物质', 'value': 'dark_matter'},
                 {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
                 {'label': '天谴之石', 'value': 'wrathstone'},
-                {
-                    'label': '伟大卡牌(力量)',
-                    'value': 'dmcg_str',
-                },
-                {
-                    'label': '伟大卡牌(敏捷)',
-                    'value': 'dmcg_agi',
-                },
-                {'label': '死亡之钟', 'value': 'grim_toll'},
-                {'label': '真实之镜', 'value': 'mirror'},
-                {'label': "洛欧塞布之影", 'value': 'loatheb'},
-                {'label': '陨星磨石', 'value': 'whetstone'},
-                {
-                    'label': '五色巨龙之怒',
-                    'value': 'fury_of_the_five_flights',
-                },
-                {'label': '门牙碎片', 'value': 'incisor_fragment'},
-                {'label': '诺甘农的印记', 'value': 'norgannon'},
-                {'label': "红龙血珠", 'value': 'sphere'},
-                {'label': '通灵能量精粹', 'value': 'extract'},
-                {'label': "盗匪的徽记", 'value': 'bandits_insignia'},
-                {'label': '死亡卡牌', 'value': 'dmcd'},
-                {'label': '悲苦之泪', 'value': 'tears'}
-            ],
-            value='comet_trail'
-        )),
-        dbc.Col(dbc.Select(
-            id='trinket_2',
-            options=[
-                {'label': 'Empty', 'value': 'none'},
-                {'label': '彗星之痕', 'value': 'comet_trail'},
-                {'label': '雷神符石', 'value': 'mjolnir_runestone'},
-                {'label': '黑暗物质', 'value': 'dark_matter'},
-                {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
-                {'label': '天谴之石', 'value': 'wrathstone'},
+                {'label': '古神之血', 'value': 'blood_of_the_old_god'},
                 {
                     'label': '伟大卡牌(力量)',
                     'value': 'dmcg_str',
@@ -924,6 +890,42 @@ iteration_input = dbc.Col([
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
             value='mjolnir_runestone'
+        )),
+        dbc.Col(dbc.Select(
+            id='trinket_2',
+            options=[
+                {'label': 'Empty', 'value': 'none'},
+                {'label': '彗星之痕', 'value': 'comet_trail'},
+                {'label': '雷神符石', 'value': 'mjolnir_runestone'},
+                {'label': '黑暗物质', 'value': 'dark_matter'},
+                {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
+                {'label': '天谴之石', 'value': 'wrathstone'},
+                {'label': '古神之血', 'value': 'blood_of_the_old_god'},
+                {
+                    'label': '伟大卡牌(力量)',
+                    'value': 'dmcg_str',
+                },
+                {
+                    'label': '伟大卡牌(敏捷)',
+                    'value': 'dmcg_agi',
+                },
+                {'label': '死亡之钟', 'value': 'grim_toll'},
+                {'label': '真实之镜', 'value': 'mirror'},
+                {'label': "洛欧塞布之影", 'value': 'loatheb'},
+                {'label': '陨星磨石', 'value': 'whetstone'},
+                {
+                    'label': '五色巨龙之怒',
+                    'value': 'fury_of_the_five_flights',
+                },
+                {'label': '门牙碎片', 'value': 'incisor_fragment'},
+                {'label': '诺甘农的印记', 'value': 'norgannon'},
+                {'label': "红龙血珠", 'value': 'sphere'},
+                {'label': '通灵能量精粹', 'value': 'extract'},
+                {'label': "盗匪的徽记", 'value': 'bandits_insignia'},
+                {'label': '死亡卡牌', 'value': 'dmcd'},
+                {'label': '悲苦之泪', 'value': 'tears'}
+            ],
+            value='comet_trail'
         )),
     ]),
     html.Div(
@@ -1000,7 +1002,20 @@ stats_output = dbc.Col(
      ]),
      html.Div([
          html.Div(
-             '暴击',
+             '破甲等级:',
+             style={'width': '50%', 'display': 'inline-block',
+                    'fontWeight': 'bold', 'fontSize': 'large'}
+         ),
+         html.Div(
+             '',
+             style={'width': '50%', 'display': 'inline-block',
+                    'fontSize': 'large'},
+             id='buffed_arp'
+         )
+     ]),
+     html.Div([
+         html.Div(
+             '83级BOSS暴击:',
              style={'width': '50%', 'display': 'inline-block',
                     'fontWeight': 'bold', 'fontSize': 'large'}
          ),
@@ -1474,8 +1489,9 @@ def create_player(
 
 def apply_buffs(
         unbuffed_ap, unbuffed_strength, unbuffed_agi, unbuffed_hit,
-        unbuffed_crit, unbuffed_mana, unbuffed_int, unbuffed_spirit,
-        unbuffed_mp5, weapon_damage, raid_buffs, consumables, imp_motw
+        unbuffed_crit, unbuffed_arp, unbuffed_mana, unbuffed_int,
+        unbuffed_spirit, unbuffed_mp5, weapon_damage, raid_buffs, consumables,
+        imp_motw
 ):
     """Takes in unbuffed player stats, and turns them into buffed stats based
     on specified consumables and raid buffs. This function should only be
@@ -1526,6 +1542,7 @@ def apply_buffs(
     buffed_weapon_damage = (
         12 * ('weightstone' in consumables) + weapon_damage
     )
+    buffed_arp = unbuffed_arp + 40 * ('arp_food' in consumables)
 
     return {
         'strength': buffed_strength,
@@ -1537,7 +1554,8 @@ def apply_buffs(
         'hit': buffed_hit,
         'weaponDamage': buffed_weapon_damage,
         'mana': buffed_mana_pool,
-        'mp5': buffed_mp5
+        'mp5': buffed_mp5,
+        'armorPenRating': buffed_arp
     }
 
 
@@ -1689,6 +1707,7 @@ def plot_new_trajectory(sim, show_whites):
     Output('buff_section', 'is_open'),
     Output('buffed_swing_timer', 'children'),
     Output('buffed_attack_power', 'children'),
+    Output('buffed_arp', 'children'),
     Output('buffed_crit', 'children'),
     Output('buffed_miss', 'children'),
     Output('buffed_mana', 'children'),
@@ -1846,10 +1865,10 @@ def compute(
         input_stats.update(apply_buffs(
             input_stats['attackPower'], input_stats['strength'],
             input_stats['agility'], input_stats['hit'], input_stats['crit'],
-            input_stats['mana'], input_stats['intellect'],
-            input_stats['spirit'], input_stats.get('mp5', 0),
-            input_stats.get('weaponDamage', 0), raid_buffs, consumables,
-            imp_motw
+            input_stats.get('armorPenRating', 0), input_stats['mana'],
+            input_stats['intellect'], input_stats['spirit'],
+            input_stats.get('mp5', 0), input_stats.get('weaponDamage', 0),
+            raid_buffs, consumables,imp_motw
         ))
 
     # Determine whether Unleashed Rage and/or Blessing of Kings are present, as
@@ -1892,6 +1911,7 @@ def compute(
     stats_output = (
         '%.3f seconds' % player.swing_timer,
         '%d' % player.attack_power,
+        '%d' % player.armor_pen_rating,
         '%.2f %%' % (player.crit_chance * 100),
         '%.2f %%' % (player.miss_chance * 100),
         '%d' % player.mana_pool, '%d' % player.intellect,
