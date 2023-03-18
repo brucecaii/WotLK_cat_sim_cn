@@ -221,6 +221,8 @@ buffs_1 = dbc.Col(
         options=[
             {'label': '凶兽神像', 'value': 'shred_idol'},
             {'label': '膜拜神像', 'value': 'rip_idol'},
+            {'label': '残毁神像', 'value': 'idol_of_mutilation'},
+            {'label': '腐蚀者神像', 'value': 'mangle_idol'},
             {'label': '裂伤雕文', 'value': 'mangle_glyph'},
             {'label': '割裂雕文', 'value': 'rip_glyph'},
             {'label': '撕碎雕文', 'value': 'shred_glyph'},
@@ -231,14 +233,17 @@ buffs_1 = dbc.Col(
             {'label': '2T7', 'value': 't7_2p'},
             {'label': '2T8', 'value': 't8_2p'},
             {'label': '4T8', 'value': 't8_4p'},
+            {'label': '2T9', 'value': 't9_2p'},
+            {'label': '4T9', 'value': 't9_4p'},
             {'label': '残酷多彩', 'value': 'meta'},
             {'label': '武器猫鼬', 'value': 'mongoose'},
             {'label': '武器狂暴', 'value': 'berserking'},
             {'label': '手套加速器', 'value': 'engi_gloves'},
         ],
         value=[
-            'shred_idol', 'rip_idol', 'rip_glyph', 'shred_glyph', 'roar_glyph',
-            't8_2p', 'meta', 'berserking', 'engi_gloves'
+            'shred_idol', 'rip_idol', 'mangle_idol', 'rip_glyph',
+            'shred_glyph', 'roar_glyph', 't8_2p', 'meta', 'berserking',
+            'engi_gloves'
         ],
         id='bonuses'
     ),
@@ -827,7 +832,7 @@ iteration_input = dbc.Col([
                     'label': '快速武器延迟平砍',
                     'value': 'daggerweave'
                 }],
-                value=['daggerweave'], id='daggerweave',
+                value=[], id='daggerweave',
                 style={'marginTop': '1%', 'marginLeft': '5%'}
             ),
             dbc.Collapse(
@@ -839,7 +844,7 @@ iteration_input = dbc.Col([
                                 addon_type='prepend'
                             ),
                             dbc.Input(
-                                type='number', value=1323, id='dagger_ep_loss',
+                                type='number', value=1415, id='dagger_ep_loss',
                                 min=0, step=1
                             ),
                         ],
@@ -860,28 +865,22 @@ iteration_input = dbc.Col([
         dbc.Col(dbc.Select(
             id='trinket_1',
             options=[
+                {'label': 'Empty', 'value': 'none'},
+                {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
+                {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
                 {'label': '雷神符石', 'value': 'mjolnir_runestone'},
                 {'label': '黑暗物质', 'value': 'dark_matter'},
                 {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
                 {'label': '天谴之石', 'value': 'wrathstone'},
                 {'label': '古神之血', 'value': 'blood_of_the_old_god'},
-                {
-                    'label': '伟大卡牌(力量)',
-                    'value': 'dmcg_str',
-                },
-                {
-                    'label': '伟大卡牌(敏捷)',
-                    'value': 'dmcg_agi',
-                },
+                {'label': '伟大卡牌(力量)','value': 'dmcg_str',},
+                {'label': '伟大卡牌(敏捷)','value': 'dmcg_agi',},
                 {'label': '死亡之钟', 'value': 'grim_toll'},
                 {'label': '真实之镜', 'value': 'mirror'},
                 {'label': "洛欧塞布之影", 'value': 'loatheb'},
                 {'label': '陨星磨石', 'value': 'whetstone'},
-                {
-                    'label': '五色巨龙之怒',
-                    'value': 'fury_of_the_five_flights',
-                },
+                {'label': '五色巨龙之怒','value': 'fury_of_the_five_flights',},
                 {'label': '门牙碎片', 'value': 'incisor_fragment'},
                 {'label': '诺甘农的印记', 'value': 'norgannon'},
                 {'label': "红龙血珠", 'value': 'sphere'},
@@ -896,28 +895,21 @@ iteration_input = dbc.Col([
             id='trinket_2',
             options=[
                 {'label': 'Empty', 'value': 'none'},
+                {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
+                {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
                 {'label': '雷神符石', 'value': 'mjolnir_runestone'},
                 {'label': '黑暗物质', 'value': 'dark_matter'},
                 {'label': '蓝铁灌注器', 'value': 'pyrite_infuser'},
                 {'label': '天谴之石', 'value': 'wrathstone'},
                 {'label': '古神之血', 'value': 'blood_of_the_old_god'},
-                {
-                    'label': '伟大卡牌(力量)',
-                    'value': 'dmcg_str',
-                },
-                {
-                    'label': '伟大卡牌(敏捷)',
-                    'value': 'dmcg_agi',
-                },
+                {'label': '伟大卡牌(力量)','value': 'dmcg_str',},
+                {'label': '伟大卡牌(敏捷)','value': 'dmcg_agi',},
                 {'label': '死亡之钟', 'value': 'grim_toll'},
                 {'label': '真实之镜', 'value': 'mirror'},
                 {'label': "洛欧塞布之影", 'value': 'loatheb'},
                 {'label': '陨星磨石', 'value': 'whetstone'},
-                {
-                    'label': '五色巨龙之怒',
-                    'value': 'fury_of_the_five_flights',
-                },
+                {'label': '五色巨龙之怒','value': 'fury_of_the_five_flights',},
                 {'label': '门牙碎片', 'value': 'incisor_fragment'},
                 {'label': '诺甘农的印记', 'value': 'norgannon'},
                 {'label': "红龙血珠", 'value': 'sphere'},
@@ -1472,7 +1464,8 @@ def create_player(
         jow='jow' in stat_debuffs, armor_pen_rating=armor_pen_rating,
         t6_2p='t6_2p' in bonuses, t6_4p='t6_4p' in bonuses,
         t7_2p='t7_2p' in bonuses, t8_2p='t8_2p' in bonuses,
-        t8_4p='t8_4p' in bonuses, wolfshead='wolfshead' in bonuses,
+        t8_4p='t8_4p' in bonuses, t9_2p='t9_2p' in bonuses,
+        t9_4p='t9_4p' in bonuses, wolfshead='wolfshead' in bonuses,
         mangle_glyph='mangle_glyph' in bonuses,
         meta='meta' in bonuses, rune='rune' in cooldowns,
         shred_bonus=shred_bonus, rip_bonus=rip_bonus, debuff_ap=debuff_ap,
@@ -1930,17 +1923,6 @@ def compute(
         trinket_list.append(trinkets.UnholyFrenzy(delay=cd_delay))
     if 'shattering_throw' in cooldowns:
         trinket_list.append(trinkets.ShatteringThrow(delay=cd_delay))
-    if 'exalted_ring' in bonuses:
-        ring_ppm = 1.0
-        ring = trinkets.ProcTrinket(
-            chance_on_hit=ring_ppm / 60.,
-            yellow_chance_on_hit=ring_ppm / 60.,
-            stat_name='attack_power', stat_increment=160 * ap_mod,
-            proc_duration=10, cooldown=60,
-            proc_name='Band of the Eternal Champion',
-        )
-        trinket_list.append(ring)
-        player.proc_trinkets.append(ring)
     if 'wastes_idol' in bonuses:
         idol = trinkets.ProcTrinket(
             chance_on_hit=0.75, stat_name='attack_power',
@@ -1949,33 +1931,18 @@ def compute(
         )
         trinket_list.append(idol)
         player.proc_trinkets.append(idol)
-    if 'idol_of_terror' in bonuses:
-        idol = trinkets.ProcTrinket(
-            chance_on_hit=0.85,
+    if 'idol_of_mutilation' in bonuses:
+        idol = trinkets.RefreshingProcTrinket(
+            chance_on_hit=0.70,
             stat_name=['agility', 'attack_power', 'crit_chance'],
             stat_increment=np.array([
-                65. * stat_mod,
-                65. * stat_mod * ap_mod,
-                65. * stat_mod / 83.33 / 100.,
+                200. * stat_mod,
+                200. * stat_mod * ap_mod,
+                200. * stat_mod / 83.33 / 100.,
             ]),
-            proc_duration=10, cooldown=10, proc_name='Primal Instinct',
-            mangle_only=True
-        )
-        trinket_list.append(idol)
-        player.proc_trinkets.append(idol)
-    if 'stag_idol' in bonuses:
-        idol = trinkets.RefreshingProcTrinket(
-            chance_on_hit=1.0, stat_name='attack_power',
-            stat_increment=94 * ap_mod, proc_duration=20, cooldown=0,
-            proc_name='Idol of the White Stag', mangle_only=True
-        )
-        trinket_list.append(idol)
-        player.proc_trinkets.append(idol)
-    if 'glad_idol' in bonuses:
-        idol = trinkets.RefreshingProcTrinket(
-            chance_on_hit=1.0, stat_name='attack_power',
-            stat_increment=120 * ap_mod, proc_duration=10, cooldown=0,
-            proc_name="Deadly Gladiator's Idol of Resolve", mangle_only=True
+            proc_duration=16, cooldown=8, proc_name='Mutilation',
+            cat_mangle_only=True,
+            shred_only=True
         )
         trinket_list.append(idol)
         player.proc_trinkets.append(idol)
@@ -2022,6 +1989,13 @@ def compute(
     if potion == 'haste':
         trinket_list.append(trinkets.HastePotion(delay=cd_delay))
 
+    mangle_idol = None
+
+    if 'mangle_idol' in bonuses:
+        mangle_idol = trinkets.IdolOfTheCorruptor(stat_mod, ap_mod)
+        trinket_list.append(mangle_idol)
+        player.proc_trinkets.append(mangle_idol)
+
     sim = ccs.Simulation(
         player, fight_length + 1e-9, 0.001 * latency, boss_armor=boss_armor,
         min_combos_for_rip=rip_combos, min_combos_for_bite=int(bite_cp),
@@ -2035,7 +2009,7 @@ def compute(
         flowershift=bool(flowershift), daggerweave=bool(daggerweave),
         dagger_ep_loss=dagger_ep_loss, min_roar_offset=min_roar_offset,
         trinkets=trinket_list, haste_multiplier=haste_multiplier,
-        hot_uptime=hot_uptime / 100.
+        hot_uptime=hot_uptime / 100., mangle_idol=mangle_idol
     )
     sim.set_active_debuffs(boss_debuffs)
     player.calc_damage_params(**sim.params)
