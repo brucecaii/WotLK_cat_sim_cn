@@ -701,6 +701,93 @@ class StackingProcTrinket(ProcTrinket):
 
         return 0.0
 
+class IdolOfTheCryingMoon(ProcTrinket):
+
+    def __init__(
+        self, stat_name, stat_increment, max_stacks, aura_name, stack_name,
+        chance_on_hit, yellow_chance_on_hit, aura_duration, cooldown,
+        aura_type='activated', aura_proc_rates=None
+    ):
+        self.stack_increment = stat_increment
+        self.max_stacks = max_stacks
+        self.aura_name = aura_name
+        self.stack_name = stack_name
+        self.stack_proc_rates = {
+            'white': chance_on_hit, 'yellow': yellow_chance_on_hit
+        }
+        self.activated_aura = (aura_type == 'activated')
+        self.aura_proc_rates = aura_proc_rates
+        ProcTrinket.__init__(
+            self, stat_name=stat_name, stat_increment=0, proc_name=aura_name,
+            proc_duration=aura_duration, cooldown=cooldown,
+            chance_on_hit=self.stack_proc_rates['white'],
+            yellow_chance_on_hit=self.stack_proc_rates['yellow']
+        )
+
+    def reset(self):
+        self.activation_time = -np.inf
+        self._reset()
+        self.stat_increment = 0
+        self.num_procs = 0
+        self.uptime = 0.0
+        self.last_update = 0.0
+
+    def _reset(self):
+        self.active = False
+        self.can_proc = False
+        self.proc_happened = False
+        self.num_stacks = 0
+        self.proc_name = self.aura_name
+
+        if not self.activated_aura:
+            self.rates = self.aura_proc_rates
+
+    def deactivate(self, player, sim, time=None):
+        # Temporarily change the stat increment to the total value gained while
+        # the trinket was active
+        self.stat_increment = self.stack_increment * self.num_stacks
+
+        # Reset trinket to inactive state
+        self._reset()
+        Trinket.deactivate(self, player, sim, time=time)
+        self.stat_increment = 0
+
+    def apply_proc(self):
+        # If can_proc is True but the stat increment is 0, it means that the
+        # last event was a trinket deactivation, so we activate the trinket.
+        if (self.activated_aura and (not self.active) and self.can_proc
+                and (self.stat_increment == 0)):
+            return True
+
+        # Ignore procs when at max stacks, and prevent future proc checks
+        if self.num_stacks == self.max_stacks:
+            self.can_proc = False
+            return False
+
+        return ProcTrinket.apply_proc(self)
+
+    def activate(self, time, player, sim):
+        if not self.active:
+            # Activate the trinket on a fresh use
+            Trinket.activate(self, time, player, sim)
+            self.can_proc = True
+            self.proc_name = self.stack_name
+            self.stat_increment = self.stack_increment
+            self.rates = self.stack_proc_rates
+        else:
+            # Apply a new buff stack. We do this "manually" rather than in the
+            # parent method because a new stack doesn't count as an actual
+            # activation.
+            self.modify_stat(time, player, sim, self.stat_increment)
+            self.num_stacks += 1
+
+            # Log if requested
+            if sim.log:
+                sim.combat_log.append(
+                    sim.gen_log(time, self.proc_name, 'applied')
+                )
+
+        return 0.0
 
 class InstantDamageProc(ProcTrinket):
     """Custom class to handle instant damage procs."""
@@ -1239,6 +1326,57 @@ trinket_library = {
             'cooldown': 120,
         },
     },
+    'banner_of_victory': {
+        'type': 'proc',
+        'passive_stats': {
+            'armor_pen_rating': 84,
+        },
+        'active_stats': {
+            'stat_name': 'attack_power',
+            'stat_increment': 1008,
+            'proc_name': 'Banner Of Victory', # to be revisited after release
+            'proc_duration': 10,
+            'cooldown': 50,
+            'proc_type': 'chance_on_hit',
+            'proc_rate': 0.20,
+        },
+    },
+    'victor_call_heroic': {
+        'type': 'stacking_proc',
+        'passive_stats': {
+            'expertise_rating': 83,
+        },
+        'active_stats': {
+            'stat_name': 'attack_power',
+            'stat_increment': 250,
+            'max_stacks': 5,
+            'aura_name': 'Rising Fury',
+            'stack_name': 'Rising Fury',
+            'proc_type': 'custom',
+            'chance_on_hit': 1.0,
+            'yellow_chance_on_hit': 1.0,
+            'aura_duration': 20,
+            'cooldown': 120,
+        },
+    },
+    'victor_call_normal': {
+        'type': 'stacking_proc',
+        'passive_stats': {
+            'expertise_rating': 83,
+        },
+        'active_stats': {
+            'stat_name': 'attack_power',
+            'stat_increment': 215,
+            'max_stacks': 5,
+            'aura_name': 'Rising Fury',
+            'stack_name': 'Rising Fury',
+            'proc_type': 'custom',
+            'chance_on_hit': 1.0,
+            'yellow_chance_on_hit': 1.0,
+            'aura_duration': 20,
+            'cooldown': 120,
+        },
+    },
     'deaths_verdict_heroic': {
         'type': 'proc',
         'passive_stats': {
@@ -1263,6 +1401,67 @@ trinket_library = {
             'stat_name': 'Agility',
             'stat_increment': 450,
             'proc_name': 'Death\'s Verdict normal',
+            'proc_duration': 15,
+            'cooldown': 45,
+            'proc_type': 'chance_on_hit',
+            'proc_rate': 0.35,
+        },
+    },
+    # https://wowpedia.fandom.com/wiki/Deathbringer%27s_Will
+    'deathbringer_will_heroic': {
+        'type': 'proc',
+        'passive_stats': {
+            'armor_pen_rating': 167,
+        },
+        'active_stats': {
+            'stat_name': 'Agility', # for druid, STR/AGI/haste
+            'stat_increment': 605,
+            'proc_name': 'Deathbringer\'s Will', # to be revisited after release
+            'proc_duration': 30,
+            'cooldown': 105,
+            'proc_type': 'chance_on_hit',
+            'proc_rate': 0.35,
+        },
+    },
+    'deathbringer_will_normal': {
+        'type': 'proc',
+        'passive_stats': {
+            'armor_pen_rating': 155,
+        },
+        'active_stats': {
+            'stat_name': 'Agility', # for druid, STR/AGI/haste
+            'stat_increment': 584,
+            'proc_name': 'Deathbringer\'s Will', # to be revisited after release
+            'proc_duration': 30,
+            'cooldown': 105,
+            'proc_type': 'chance_on_hit',
+            'proc_rate': 0.35,
+        },
+    },
+    'whispering_fanged_skull_heroic': {
+        'type': 'proc',
+        'passive_stats': {
+            'crit_chance': 148./45.91/100,
+        },
+        'active_stats': {
+            'stat_name': 'attack_power',
+            'stat_increment': 1250,
+            'proc_name': 'Whispering Fanged Skull', # to be revisited after release
+            'proc_duration': 15,
+            'cooldown': 45,
+            'proc_type': 'chance_on_hit',
+            'proc_rate': 0.35,
+        },
+    },
+    'whispering_fanged_skull_normal': {
+        'type': 'proc',
+        'passive_stats': {
+            'crit_chance': 131./45.91/100,
+        },
+        'active_stats': {
+            'stat_name': 'attack_power',
+            'stat_increment': 1100,
+            'proc_name': 'Whispering Fanged Skull', # to be revisited after release
             'proc_duration': 15,
             'cooldown': 45,
             'proc_type': 'chance_on_hit',

@@ -114,6 +114,7 @@ stat_input = dbc.Col([
             {'label': 'Idol of the Wastes', 'value': 'wastes_idol'},
             {'label': 'Idol of Mutilation', 'value': 'idol_of_mutilation'},
             {'label': 'Idol of the Corruptor', 'value': 'mangle_idol'},
+            {'label': 'Idol of the Crying Moon', 'value': 'idol_of_crying_moon'},
             {'label': 'Glyph of Mangle', 'value': 'mangle_glyph'},
             {'label': 'Glyph of Rip', 'value': 'rip_glyph'},
             {'label': 'Glyph of Shred', 'value': 'shred_glyph'},
@@ -832,6 +833,22 @@ iteration_input = dbc.Col([
             options=[
                 {'label': 'Empty', 'value': 'none'},
                 {
+                    'label': 'Whispering Fanged Skull (H)',
+                    'value': 'whispering_fanged_skull_heroic',
+                },
+                {
+                    'label': 'Whispering Fanged Skull (N)',
+                    'value': 'whispering_fanged_skull_normal',
+                },
+                {
+                    'label': 'Deathbringer\'s Will (H)',
+                    'value': 'deathbringer_will_heroic',
+                },
+                {
+                    'label': 'Deathbringer\'s Will (N)',
+                    'value': 'deathbringer_will_normal',
+                },
+                {
                     'label': 'Death\'s Verdict (H)',
                     'value': 'deaths_verdict_heroic',
                 },
@@ -839,6 +856,9 @@ iteration_input = dbc.Col([
                     'label': 'Death\'s Verdict (N)',
                     'value': 'deaths_verdict_normal',
                 },
+                {'label': 'Victor\'s Call (H)', 'value': 'victor_call_heroic'},
+                {'label': 'Victor\'s Call (N)', 'value': 'victor_call_normal'},
+                {'label': 'Banner Of Victory', 'value': 'banner_of_victory'},
                 {'label': 'Comet\'s Trail', 'value': 'comet_trail'},
                 {'label': 'Mjolnir Runestone', 'value': 'mjolnir_runestone'},
                 {'label': 'Dark Matter', 'value': 'dark_matter'},
@@ -893,6 +913,22 @@ iteration_input = dbc.Col([
             options=[
                 {'label': 'Empty', 'value': 'none'},
                 {
+                    'label': 'Whispering Fanged Skull (H)',
+                    'value': 'whispering_fanged_skull_heroic',
+                },
+                {
+                    'label': 'Whispering Fanged Skull (N)',
+                    'value': 'whispering_fanged_skull_normal',
+                },
+                {
+                    'label': 'Deathbringer\'s Will (H)',
+                    'value': 'deathbringer_will_heroic',
+                },
+                {
+                    'label': 'Deathbringer\'s Will (N)',
+                    'value': 'deathbringer_will_normal',
+                },
+                {
                     'label': 'Death\'s Verdict (H)',
                     'value': 'deaths_verdict_heroic',
                 },
@@ -900,6 +936,9 @@ iteration_input = dbc.Col([
                     'label': 'Death\'s Verdict (N)',
                     'value': 'deaths_verdict_normal',
                 },
+                {'label': 'Victor\'s Call (H)', 'value': 'victor_call_heroic'},
+                {'label': 'Victor\'s Call (N)', 'value': 'victor_call_normal'},
+                {'label': 'Banner Of Victory', 'value': 'banner_of_victory'},
                 {'label': 'Comet\'s Trail', 'value': 'comet_trail'},
                 {'label': 'Mjolnir Runestone', 'value': 'mjolnir_runestone'},
                 {'label': 'Dark Matter', 'value': 'dark_matter'},
@@ -1978,6 +2017,20 @@ def compute(
         )
         trinket_list.append(idol)
         player.proc_trinkets.append(idol)
+    if 'idol_of_crying_moon' in bonuses:
+        idol_of_crying_moon = trinkets.StackingProcTrinket(
+            stat_name=['agility'],
+            stat_increment=44,
+            max_stacks=5,
+            aura_name='Idol Of The Crying Moon',
+            stack_name='Idol Of The Crying Moon',
+            chance_on_hit=0,
+            yellow_chance_on_hit=1.0,
+            aura_duration=15,
+            cooldown=0,
+        )
+        trinket_list.append(idol_of_crying_moon)
+        player.proc_trinkets.append(idol_of_crying_moon)
     if 'mongoose' in bonuses:
         mongoose_ppm = 0.73
         mongoose_enchant = trinkets.RefreshingProcTrinket(
