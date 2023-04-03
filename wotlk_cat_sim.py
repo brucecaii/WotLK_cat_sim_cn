@@ -1571,7 +1571,12 @@ class Simulation():
             if trinket.periodic_only:
                 trinket.check_for_proc(False, True)
                 tick_damage += trinket.update(time, self.player, self)
-
+            if trinket.rake_bleed_only and ability_name == 'Rake':
+                trinket.check_for_proc(False, True)
+                tick_damage += trinket.update(time, self.player, self)
+            if trinket.lacerate_bleed_only and ability_name == 'Lacerate':
+                trinket.check_for_proc(False, True)
+                tick_damage += trinket.update(time, self.player, self)
         
         if self.player.t8_2p_bonus and time - 15 >= self.t8_2p_icd:
             t8_2p_proc = np.random.rand()
@@ -1801,7 +1806,11 @@ class Simulation():
 
             # Activate or deactivate trinkets if appropriate
             for trinket in self.trinkets:
-                dmg_done += trinket.update(time, self.player, self)
+                if not hasattr(trinket, 'rake_bleed_only') or \
+                    (hasattr(trinket, 'rake_bleed_only') and not trinket.rake_bleed_only) and not \
+                    hasattr(trinket, 'lacerate_bleed_only') or \
+                    (hasattr(trinket, 'lacerate_bleed_only') and not trinket.lacerate_bleed_only):
+                    dmg_done += trinket.update(time, self.player, self)
 
             # Use Enrage if appropriate
             if (self.strategy['bearweave'] and (not self.player.cat_form)
@@ -1928,7 +1937,11 @@ class Simulation():
 
             # If a trinket proc occurred from a swing or special, apply it
             for trinket in self.trinkets:
-                dmg_done += trinket.update(time, self.player, self)
+                if not hasattr(trinket, 'rake_bleed_only') or \
+                    (hasattr(trinket, 'rake_bleed_only') and not trinket.rake_bleed_only) and not \
+                    hasattr(trinket, 'lacerate_bleed_only') or \
+                    (hasattr(trinket, 'lacerate_bleed_only') and not trinket.lacerate_bleed_only):
+                    dmg_done += trinket.update(time, self.player, self)
 
             # If a proc ended at this timestep, remove it from the list
             if self.proc_end_times and (time == self.proc_end_times[0]):

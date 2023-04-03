@@ -2018,17 +2018,7 @@ def compute(
         trinket_list.append(idol)
         player.proc_trinkets.append(idol)
     if 'idol_of_crying_moon' in bonuses:
-        idol_of_crying_moon = trinkets.StackingProcTrinket(
-            stat_name=['agility'],
-            stat_increment=44,
-            max_stacks=5,
-            aura_name='Idol Of The Crying Moon',
-            stack_name='Idol Of The Crying Moon',
-            chance_on_hit=0,
-            yellow_chance_on_hit=1.0,
-            aura_duration=15,
-            cooldown=0,
-        )
+        idol_of_crying_moon = trinkets.IdolOfTheCryingMoon()
         trinket_list.append(idol_of_crying_moon)
         player.proc_trinkets.append(idol_of_crying_moon)
     if 'mongoose' in bonuses:
