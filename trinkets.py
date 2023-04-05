@@ -707,12 +707,12 @@ class StackingProcTrinket(ProcTrinket):
 class IdolOfTheCryingMoon(StackingProcTrinket):
 
     def __init__(self):
-        stat_name = ['agility']
+        stat_name = 'agility'
         stat_increment = 44
         max_stacks = 5
         aura_name = 'Idol Of The Crying Moon'
         stack_name = 'Idol Of The Crying Moon'
-        chance_on_hit = 0
+        chance_on_hit = 1
         yellow_chance_on_hit = 1.0
         aura_duration = 15
         cooldown = 0
@@ -724,6 +724,32 @@ class IdolOfTheCryingMoon(StackingProcTrinket):
         )
         self.rake_bleed_only = True
         self.lacerate_bleed_only = True
+
+    def update(self, time, player, sim):
+        
+        # Update average proc uptime value
+        if time > self.last_update:
+            dt = time - self.last_update
+            self.uptime = (
+                (self.uptime * self.last_update + dt * self.active) / time
+            )
+            self.last_update = time
+
+        # First check if an existing buff has fallen off
+        if self.active and (time > self.deactivation_time - 1e-9):
+            self.deactivate(player, sim)
+
+        # Then check whether the trinket is off CD and can now proc
+        if (not self.can_proc
+                and (time - self.activation_time > self.cooldown - 1e-9)):
+            self.can_proc = True
+
+        # Now decide whether a proc actually happens
+        if allow_activation and self.apply_proc():
+            return self.activate(time, player, sim)
+
+        # Return default damage dealt of 0
+        return 0.0
 
 class InstantDamageProc(ProcTrinket):
     """Custom class to handle instant damage procs."""
