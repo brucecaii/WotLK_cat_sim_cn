@@ -293,7 +293,7 @@ encounter_details = dbc.Col(
                  'value': 'blood_frenzy'
              },
              {
-                'label': "Curse of Elements / Earth and Moon / Ebon Plaguebringer",
+                'label': "元素诅咒 / 大地与月亮 / 黑色热疫使者",
                 'value': 'curse_of_elements'
              },
          ],
@@ -307,9 +307,9 @@ encounter_details = dbc.Col(
                  'value': 'jotc'
              },
              {'label': '智慧祝福', 'value': 'jow'},
-             {'label': 'Misery / Improved Faerie Fire', 'value': 'misery'},
+             {'label': '悲惨 / 强化精灵火', 'value': 'misery'},
              {
-                 'label': 'Shadow Mastery / Improved Scorch / Winter\'s Chill',
+                 'label': '暗影掌握 / 强化灼烧 / 深冬之寒',
                  'value': 'shadow_mastery'
              },
          ],
@@ -988,7 +988,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='更新于2023.04.12 增强猫版本 支持P3数据',
+        children='更新于2023.04.12 增强猫版本 支持P4数据 (缺饰品和神像)',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
