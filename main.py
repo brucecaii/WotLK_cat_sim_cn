@@ -235,15 +235,17 @@ buffs_1 = dbc.Col(
             {'label': '4T8', 'value': 't8_4p'},
             {'label': '2T9', 'value': 't9_2p'},
             {'label': '4T9', 'value': 't9_4p'},
+            {'label': '2T10', 'value': 't10_2p'},
+            {'label': '4T10', 'value': 't10_4p'},
+            {'label': '狼头之盔', 'value': 'wolfshead'},
             {'label': '残酷多彩', 'value': 'meta'},
             {'label': '武器猫鼬', 'value': 'mongoose'},
             {'label': '武器狂暴', 'value': 'berserking'},
             {'label': '手套加速器', 'value': 'engi_gloves'},
         ],
         value=[
-            'shred_idol', 'rip_idol', 'mangle_idol', 'rip_glyph',
-            'shred_glyph', 'roar_glyph', 't8_2p', 'meta', 'berserking',
-            'engi_gloves'
+            'shred_idol', 'mangle_idol', 'rip_glyph', 'shred_glyph',
+            'roar_glyph', 't8_2p', 'meta', 'berserking', 'engi_gloves'
         ],
         id='bonuses'
     ),
@@ -290,8 +292,12 @@ encounter_details = dbc.Col(
                  'label': '血性狂乱/野蛮战斗',
                  'value': 'blood_frenzy'
              },
+             {
+                'label': "Curse of Elements / Earth and Moon / Ebon Plaguebringer",
+                'value': 'curse_of_elements'
+             },
          ],
-         value=['sunder', 'faerie_fire', 'blood_frenzy'],
+         value=['gift_of_arthas', 'sunder', 'faerie_fire', 'blood_frenzy', 'curse_of_elements'],
          id='boss_debuffs'
     ),
         dbc.Checklist(
@@ -300,12 +306,14 @@ encounter_details = dbc.Col(
                  'label': '十字军之心/毒物大师',
                  'value': 'jotc'
              },
+             {'label': '智慧祝福', 'value': 'jow'},
+             {'label': 'Misery / Improved Faerie Fire', 'value': 'misery'},
              {
-                 'label': '智慧审判',
-                 'value': 'jow'
+                 'label': 'Shadow Mastery / Improved Scorch / Winter\'s Chill',
+                 'value': 'shadow_mastery'
              },
          ],
-         value=['jotc', 'jow'],
+         value=['jotc', 'jow', 'misery', 'shadow_mastery'],
          id='stat_debuffs',
     ),
         html.Br(),
@@ -348,27 +356,27 @@ encounter_details = dbc.Col(
                 style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-                 }
-            ),
-            dbc.Select(
-                options=[
-                    {'label': '0', 'value': 0},
-                    {'label': '1', 'value': 1},
-                    {'label': '2', 'value': 2},
-                    {'label': '3', 'value': 3},
-                    {'label': '4', 'value': 4},
-                    {'label': '5', 'value': 5},
-                ],
-                value='0', id='feral_aggression',
-                style={
-                    'width': '20%', 'display': 'inline-block',
-                    'marginBottom': '2.5%', 'marginRight': '5%'
-                }
-            )]),
-        html.Div([
-            html.Div(
-                '野蛮暴怒',
-                style={
+             }
+         ),
+         dbc.Select(
+             options=[
+                 {'label': '0', 'value': 0},
+                 {'label': '1', 'value': 1},
+                 {'label': '2', 'value': 2},
+                 {'label': '3', 'value': 3},
+                 {'label': '4', 'value': 4},
+                 {'label': '5', 'value': 5},
+             ],
+             value=4, id='feral_aggression',
+             style={
+                 'width': '20%', 'display': 'inline-block',
+                 'marginBottom': '2.5%', 'marginRight': '5%'
+             }
+         )]),
+     html.Div([
+         html.Div(
+             '野蛮暴怒:',
+             style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
                  }
@@ -391,25 +399,25 @@ encounter_details = dbc.Col(
                 style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-                 }
-            ),
-            dbc.Select(
-                options=[
-                    {'label': '0', 'value': 0},
-                    {'label': '1', 'value': 1},
-                    {'label': '2', 'value': 2},
-                    {'label': '3', 'value': 3},
-                ],
-                value=3, id='potp',
-                style={
-                    'width': '20%', 'display': 'inline-block',
-                    'marginBottom': '2.5%', 'marginRight': '5%'
-                }
-            )]),
-        html.Div([
-            html.Div(
-                '狩猎天性',
-                style={
+             }
+         ),
+         dbc.Select(
+             options=[
+                 {'label': '0', 'value': 0},
+                 {'label': '1', 'value': 1},
+                 {'label': '2', 'value': 2},
+                 {'label': '3', 'value': 3},
+             ],
+             value='0', id='potp',
+             style={
+                 'width': '20%', 'display': 'inline-block',
+                 'marginBottom': '2.5%', 'marginRight': '5%'
+             }
+         )]),
+     html.Div([
+         html.Div(
+             '狩猎天性:',
+             style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
                  }
@@ -474,27 +482,27 @@ encounter_details = dbc.Col(
                 style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
-                 }
-            ),
-            dbc.Select(
-                options=[
-                    {'label': '0', 'value': 0},
-                    {'label': '1', 'value': 1},
-                    {'label': '2', 'value': 2},
-                    {'label': '3', 'value': 3},
-                    {'label': '4', 'value': 4},
-                    {'label': '5', 'value': 5},
-                ],
-                value=5, id='furor',
-                style={
-                    'width': '20%', 'display': 'inline-block',
-                    'marginBottom': '2.5%', 'marginRight': '5%'
-                }
-            )]),
-        html.Div([
-            html.Div(
-                '自然主义',
-                style={
+             }
+         ),
+         dbc.Select(
+             options=[
+                 {'label': '0', 'value': 0},
+                 {'label': '1', 'value': 1},
+                 {'label': '2', 'value': 2},
+                 {'label': '3', 'value': 3},
+                 {'label': '4', 'value': 4},
+                 {'label': '5', 'value': 5},
+             ],
+             value=3, id='furor',
+             style={
+                 'width': '20%', 'display': 'inline-block',
+                 'marginBottom': '2.5%', 'marginRight': '5%'
+             }
+         )]),
+     html.Div([
+         html.Div(
+             '自然主义:',
+             style={
                  'width': '35%', 'display': 'inline-block',
                  'fontWeight': 'bold'
                  }
@@ -567,7 +575,7 @@ iteration_input = dbc.Col([
     dbc.InputGroup(
         [
             dbc.InputGroupAddon('样本数量', addon_type='prepend'),
-            dbc.Input(value=67000, type='number', id='num_replicates')
+            dbc.Input(value=30000, type='number', id='num_replicates')
         ],
         style={'width': '100%'}
     ),
@@ -634,17 +642,41 @@ iteration_input = dbc.Col([
                 '保持咆哮和割间隔', addon_type='prepend'
             ),
             dbc.Input(
-                value=12, min=0, step=1, type='number', id='min_roar_offset'
+                value=24, min=0, step=1, type='number', id='min_roar_offset'
             ),
             dbc.InputGroupAddon('秒', addon_type='append')
         ],
-        style={'width': '100%'}
+        style={'width': '65%', 'marginBottom': '1.5%'}
     ),
     html.Div(
-        '*熊猫舞最佳为14,爪凶流为13',
+        '*非4T8为24秒,4T8为34秒',
         style={
             'marginTop': '2.5%', 'fontSize': 'medium', 'fontWeight': 'bold'
         },
+    ),
+    dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(
+                '割裂Leeway延迟设置(咆哮覆盖):', addon_type='prepend'
+            ),
+            dbc.Input(
+                value=3, min=0, step=1, type='number', id='roar_clip_leeway'
+            ),
+            dbc.InputGroupAddon('seconds', addon_type='append')
+        ],
+        style={'width': '67%', 'marginBottom': '1.5%'}
+    ),
+    dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(
+                '精灵火能量上限:',
+                addon_type='prepend'
+            ),
+            dbc.Input(
+                value=15, min=0, step=1, type='number', id='berserk_ff_thresh'
+            ),
+        ],
+        style={'width': '67%'}
     ),
     html.Br(),
     dbc.Checklist(
@@ -694,7 +726,7 @@ iteration_input = dbc.Col([
                                 addon_type='prepend'
                             ),
                             dbc.Input(
-                                type='number', value=10, id='bite_time',
+                                type='number', value=4, id='bite_time',
                                 min=0, step=1
                             ),
                             dbc.InputGroupAddon(
@@ -750,7 +782,7 @@ iteration_input = dbc.Col([
     ),
     dbc.Checklist(
         options=[{'label': '熊猫舞流派', 'value': 'bearweave'}],
-        value=['bearweave'], id='bearweave'
+        value=[], id='bearweave'
     ),
     dbc.Collapse(
         [
@@ -759,7 +791,7 @@ iteration_input = dbc.Col([
                     'label': '割伤舞(取消勾选时为裂伤舞)',
                     'value': 'lacerate_prio'
                 }],
-                value=['lacerate_prio'], id='lacerate_prio',
+                value=[], id='lacerate_prio',
                 style={'marginTop': '1%', 'marginLeft': '5%'}
             ),
             dbc.Collapse(
@@ -1396,10 +1428,10 @@ def process_trinkets(
 
 
 def create_player(
-        buffed_agility, buffed_attack_power, buffed_hit, buffed_crit,
-        buffed_weapon_damage, haste_rating, expertise_rating, armor_pen_rating,
-        buffed_mana_pool, buffed_int, buffed_spirit, buffed_mp5, weapon_speed,
-        unleashed_rage, kings, raven_idol, other_buffs, stat_debuffs,
+        buffed_agility, buffed_attack_power, buffed_hit, buffed_spell_hit, buffed_crit,
+        buffed_spell_crit, buffed_weapon_damage, haste_rating, expertise_rating, 
+        armor_pen_rating, buffed_mana_pool, buffed_int, buffed_spirit, buffed_mp5, 
+        weapon_speed, unleashed_rage, kings, raven_idol, other_buffs, stat_debuffs,
         cooldowns, bonuses, binary_talents, naturalist, feral_aggression,
         savage_fury, potp, predatory_instincts, improved_mangle, imp_motw, furor,
         natural_shapeshifter, ilotp, potion, gotw_targets
@@ -1432,7 +1464,13 @@ def create_player(
         buffed_crit + 3 * ('jotc' in stat_debuffs)
         + (28 * ('be_chain' in other_buffs) + 40 * bool(raven_idol)) / 45.91
     )
+    encounter_spell_crit = (
+        buffed_spell_crit + 3 * ('jotc' in stat_debuffs)
+        + 5 * ('shadow_mastery' in stat_debuffs)
+        + (28 * ('be_chain' in other_buffs) + 40 * bool(raven_idol)) / 45.91
+    )
     encounter_hit = buffed_hit
+    encounter_spell_hit = (buffed_spell_hit + 3 * ('misery' in stat_debuffs))
     encounter_mp5 = (
         buffed_mp5 + 0.01 * buffed_mana_pool * ('replenishment' in other_buffs)
     )
@@ -1443,13 +1481,16 @@ def create_player(
         (1 + 0.02 * int(naturalist))
         * (1 + 0.03 * ('sanc_aura' in other_buffs))
     )
+    spell_damage_multiplier = (1 + 0.03 * ('sanc_aura' in other_buffs))
     shred_bonus = 203 * ('shred_idol' in bonuses)
     rip_bonus = 21 * ('rip_idol' in bonuses)
 
     # Create and return a corresponding Player object
     player = player_class.Player(
         attack_power=buffed_attack_power, ap_mod=ap_mod,
-        agility=buffed_agility, hit_chance=encounter_hit / 100,
+        agility=buffed_agility, hit_chance=encounter_hit / 100, 
+        spell_crit_chance=encounter_spell_crit / 100,
+        spell_hit_chance=encounter_spell_hit / 100,
         expertise_rating=expertise_rating, crit_chance=encounter_crit / 100,
         swing_timer=buffed_swing_timer, mana=buffed_mana_pool,
         intellect=buffed_int, spirit=buffed_spirit, mp5=encounter_mp5,
@@ -1461,11 +1502,13 @@ def create_player(
         natural_shapeshifter=int(natural_shapeshifter),
         ilotp=int(ilotp), weapon_speed=weapon_speed,
         bonus_damage=encounter_weapon_damage, multiplier=damage_multiplier,
+        spell_damage_multiplier=spell_damage_multiplier,
         jow='jow' in stat_debuffs, armor_pen_rating=armor_pen_rating,
         t6_2p='t6_2p' in bonuses, t6_4p='t6_4p' in bonuses,
         t7_2p='t7_2p' in bonuses, t8_2p='t8_2p' in bonuses,
         t8_4p='t8_4p' in bonuses, t9_2p='t9_2p' in bonuses,
-        t9_4p='t9_4p' in bonuses, wolfshead='wolfshead' in bonuses,
+        t9_4p='t9_4p' in bonuses, t10_2p='t10_2p' in bonuses, 
+        t10_4p='t10_4p' in bonuses, wolfshead='wolfshead' in bonuses,
         mangle_glyph='mangle_glyph' in bonuses,
         meta='meta' in bonuses, rune='rune' in cooldowns,
         shred_bonus=shred_bonus, rip_bonus=rip_bonus, debuff_ap=debuff_ap,
@@ -1482,10 +1525,10 @@ def create_player(
 
 
 def apply_buffs(
-        unbuffed_ap, unbuffed_strength, unbuffed_agi, unbuffed_hit,
-        unbuffed_crit, unbuffed_arp, unbuffed_mana, unbuffed_int,
-        unbuffed_spirit, unbuffed_mp5, weapon_damage, raid_buffs, consumables,
-        imp_motw
+        unbuffed_ap, unbuffed_strength, unbuffed_agi, unbuffed_hit, 
+        unbuffed_spell_hit, unbuffed_crit, unbuffed_spell_crit,
+        unbuffed_arp, unbuffed_mana, unbuffed_int, unbuffed_spirit, 
+        unbuffed_mp5, weapon_damage, raid_buffs, consumables, imp_motw
 ):
     """Takes in unbuffed player stats, and turns them into buffed stats based
     on specified consumables and raid buffs. This function should only be
@@ -1495,6 +1538,7 @@ def apply_buffs(
     # Determine "raw" AP, crit, and mana not from Str/Agi/Int
     raw_ap_unbuffed = unbuffed_ap / 1.1 - 2 * unbuffed_strength - unbuffed_agi
     raw_crit_unbuffed = unbuffed_crit - unbuffed_agi / 83.33
+    raw_spell_crit_unbuffed = unbuffed_spell_crit - unbuffed_int / 166.67
     raw_mana_unbuffed = unbuffed_mana - 15 * unbuffed_int
 
     # Augment all base stats based on specified buffs
@@ -1527,9 +1571,17 @@ def apply_buffs(
     buffed_crit = (
         raw_crit_unbuffed + buffed_agi / 83.33 + added_crit_rating / 45.91
     )
+    buffed_spell_crit = (
+        raw_spell_crit_unbuffed + buffed_int / 166.67 
+        + added_crit_rating / 45.91 + 5 * ('moonkin_aura' in raid_buffs)
+    )
     buffed_hit = (
         unbuffed_hit + 1 * ('heroic_presence' in raid_buffs)
         + 40 / 32.79 * ('hit_food' in consumables)
+    )
+    buffed_spell_hit = (
+        unbuffed_spell_hit + 1 * ('heroic_presence' in raid_buffs) \
+            + 40 / 26.23 * ('hit_food' in consumables)
     )
     buffed_mana_pool = raw_mana_unbuffed + buffed_int * 15
     buffed_mp5 = unbuffed_mp5 + 110 * ('wisdom' in raid_buffs)
@@ -1545,7 +1597,9 @@ def apply_buffs(
         'spirit': buffed_spirit,
         'attackPower': buffed_attack_power,
         'crit': buffed_crit,
+        'spellCrit': buffed_spell_crit,
         'hit': buffed_hit,
+        'spellHit': buffed_spell_hit,
         'weaponDamage': buffed_weapon_damage,
         'mana': buffed_mana_pool,
         'mp5': buffed_mp5,
@@ -1752,6 +1806,7 @@ def plot_new_trajectory(sim, show_whites):
     State('bite_cp', 'value'),
     State('cd_delay', 'value'),
     State('min_roar_offset', 'value'),
+    State('roar_clip_leeway', 'value'),
     State('use_rake', 'value'),
     State('mangle_spam', 'value'),
     State('use_biteweave', 'value'),
@@ -1762,6 +1817,7 @@ def plot_new_trajectory(sim, show_whites):
     State('preproc_omen', 'value'),
     State('bearweave', 'value'),
     State('berserk_bite_thresh', 'value'),
+    State('berserk_ff_thresh', 'value'),
     State('lacerate_prio', 'value'),
     State('lacerate_time', 'value'),
     State('powerbear', 'value'),
@@ -1782,11 +1838,12 @@ def compute(
         predatory_instincts, improved_mangle, furor, naturalist,
         natural_shapeshifter, ilotp, fight_length, boss_armor,
         boss_debuffs, cooldowns, rip_cp, bite_cp, cd_delay,
-        min_roar_offset, use_rake, mangle_spam, use_biteweave, bite_model,
-        bite_time, bear_mangle, prepop_berserk, preproc_omen, bearweave,
-        berserk_bite_thresh, lacerate_prio, lacerate_time, powerbear, snek,
-        flowershift, gotw_targets, daggerweave, dagger_ep_loss, num_replicates,
-        latency, epic_gems, show_whites
+        min_roar_offset, roar_clip_leeway, use_rake, mangle_spam,
+        use_biteweave, bite_model, bite_time, bear_mangle, prepop_berserk,
+        preproc_omen, bearweave, berserk_bite_thresh, berserk_ff_thresh,
+        lacerate_prio, lacerate_time, powerbear, snek, flowershift,
+        gotw_targets, daggerweave, dagger_ep_loss, num_replicates, latency,
+        epic_gems, show_whites
 ):
     ctx = dash.callback_context
 
@@ -1858,9 +1915,9 @@ def compute(
     if not buffs_present:
         input_stats.update(apply_buffs(
             input_stats['attackPower'], input_stats['strength'],
-            input_stats['agility'], input_stats['hit'], input_stats['crit'],
-            input_stats.get('armorPenRating', 0), input_stats['mana'],
-            input_stats['intellect'], input_stats['spirit'],
+            input_stats['agility'], input_stats['hit'], input_stats["spellHit"],
+            input_stats['crit'], input_stats['spellCrit'], input_stats.get('armorPenRating', 0), 
+            input_stats['mana'], input_stats['intellect'], input_stats['spirit'],
             input_stats.get('mp5', 0), input_stats.get('weaponDamage', 0),
             raid_buffs, consumables,imp_motw
         ))
@@ -1883,7 +1940,8 @@ def compute(
     # Create Player object based on raid buffed stat inputs and talents
     player, ap_mod, stat_mod, haste_multiplier = create_player(
         input_stats['agility'], input_stats['attackPower'], input_stats['hit'],
-        input_stats['crit'], input_stats.get('weaponDamage', 0),
+        input_stats['spellHit'], input_stats['crit'], input_stats['spellCrit'],
+        input_stats.get('weaponDamage', 0),
         input_stats.get('hasteRating', 0),
         input_stats.get('expertiseRating', 0),
         input_stats.get('armorPenRating', 0), input_stats['mana'],
@@ -2004,10 +2062,11 @@ def compute(
         use_berserk='berserk' in binary_talents,
         prepop_berserk=bool(prepop_berserk), preproc_omen=bool(preproc_omen),
         bearweave=bool(bearweave), berserk_bite_thresh=berserk_bite_thresh,
-        lacerate_prio=bool(lacerate_prio), lacerate_time=lacerate_time,
-        powerbear=bool(powerbear), snek=bool(snek) and bool(bearweave),
-        flowershift=bool(flowershift), daggerweave=bool(daggerweave),
-        dagger_ep_loss=dagger_ep_loss, min_roar_offset=min_roar_offset,
+        berserk_ff_thresh=berserk_ff_thresh, lacerate_prio=bool(lacerate_prio),
+        lacerate_time=lacerate_time, powerbear=bool(powerbear),
+        snek=bool(snek) and bool(bearweave), flowershift=bool(flowershift),
+        daggerweave=bool(daggerweave), dagger_ep_loss=dagger_ep_loss,
+        min_roar_offset=min_roar_offset, roar_clip_leeway=roar_clip_leeway,
         trinkets=trinket_list, haste_multiplier=haste_multiplier,
         hot_uptime=hot_uptime / 100., mangle_idol=mangle_idol
     )
@@ -2055,6 +2114,7 @@ def compute(
     Output('empirical_options', 'is_open'),
     Output('lacerate_options', 'is_open'),
     Output('bearweave', 'options'),
+    Output('lacerate_prio', 'options'),
     Output('flowershift', 'options'),
     Output('flowershift_options', 'is_open'),
     Output('dagger_options', 'is_open'),
@@ -2073,17 +2133,21 @@ def disable_options(
     flowershift_options = {
         'label': '爪子舞流派', 'value': 'flowershift'
     }
+    lacerate_options = {
+        'label': ' prioritize Lacerate maintenance over Mangle',
+        'value': 'lacerate_prio'
+    }
 
-    if bearweave:
-        flowershift_options['disabled'] = True
-    if flowershift:
-        bearweave_options['disabled'] = True
+    # Disable Lacerateweave and flowershift in UI given recent Blizzard changes
+    flowershift_options['disabled'] = True
+    bearweave_options['disabled'] = False
+    lacerate_options['disabled'] = True
 
     return (
         bool(bearweave), bool(biteweave), 'berserk' in binary_talents,
         'omen' in binary_talents, bite_model == 'empirical',
-        bool(lacerate_prio), [bearweave_options], [flowershift_options],
-        bool(flowershift), bool(daggerweave)
+        bool(lacerate_prio), [bearweave_options], [lacerate_options],
+        [flowershift_options], bool(flowershift), bool(daggerweave)
     )
 
 
