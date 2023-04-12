@@ -980,7 +980,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v2.1',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.0',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -988,7 +988,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='更新于2023.01.21 P2奥杜尔版本',
+        children='更新于2023.04.12 增强猫版本 支持P3数据',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
