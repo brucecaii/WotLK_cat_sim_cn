@@ -817,10 +817,14 @@ class Simulation():
         max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph
         rip_end = self.rip_start + max_rip_dur
 
-        # If the existing Roar already falls off well after the existing Roar,
+        # If the existing Roar already falls off well after the existing Rip,
         # then no need to clip.
-        # if self.roar_end >= rip_end + self.strategy['min_roar_offset']:
         if self.roar_end > rip_end + self.strategy['roar_clip_leeway']:
+            return False
+
+        # If the existing Roar already covers us to the end of the fight, then
+        # no need to clip.
+        if self.roar_end >= self.fight_length:
             return False
 
         # Calculate when Roar would end if we cast it now.
@@ -926,12 +930,12 @@ class Simulation():
         weave_energy = furor_cap + energy_munch - 40 - 20 * self.latency
 
         # With 4/5 or 5/5 Furor, force 2-GCD bearweaves whenever possible
-        if self.player.furor > 3:
-            weave_energy -= 15
+        # if self.player.furor > 3:
+        #     weave_energy -= 15
 
-            # Force a 3-GCD weave when stacking Lacerates for the first time
-            if self.strategy['lacerate_prio'] and (not self.lacerate_debuff):
-                weave_energy -= 15
+        #     # Force a 3-GCD weave when stacking Lacerates for the first time
+        #     if self.strategy['lacerate_prio'] and (not self.lacerate_debuff):
+        #         weave_energy -= 15
 
         # Bearweave decision tree
         can_weave = (
@@ -1200,6 +1204,19 @@ class Simulation():
             and ((not rip_now) or (energy < self.player.rip_cost))
         )
 
+        # Additionally, block Shred and Rake casts if FF is coming off CD in
+        # less than a second (and we won't Energy cap by pooling).
+        next_ff_energy = (
+            energy + 10 * (self.player.faerie_fire_cd + self.latency)
+        )
+        # wait_for_ff = (
+        #     (self.player.faerie_fire_cd < 1.0)
+        #     and (next_ff_energy < ff_energy_threshold)
+        #     and (not self.player.omen_proc)
+        #     and ((not self.rip_debuff) or (self.rip_end - time > 1.0))
+        # )
+        wait_for_ff = False
+
         # First figure out how much Energy we must float in order to be able
         # to refresh our buffs/debuffs as soon as they fall off
         pending_actions = []
@@ -1429,11 +1446,11 @@ class Simulation():
             if energy >= self.player.bite_cost:
                 return self.player.bite()
             time_to_next_action = (self.player.bite_cost - energy) / 10.
-        elif rake_now:
+        elif rake_now and (not wait_for_ff):
             if (energy >= self.player.rake_cost) or self.player.omen_proc:
                 return self.rake(time)
             time_to_next_action = (self.player.rake_cost - energy) / 10.
-        elif mangle_now:
+        elif mangle_now and (not wait_for_ff):
             if (energy >= mangle_cost) or self.player.omen_proc:
                 return self.mangle(time)
             time_to_next_action = (mangle_cost - energy) / 10.
@@ -1445,7 +1462,7 @@ class Simulation():
             if excess_e >= mangle_cost:
                 return self.mangle(time)
             time_to_next_action = (mangle_cost - excess_e) / 10.
-        else:
+        elif (not wait_for_ff):
             if (excess_e >= self.player.shred_cost) or self.player.omen_proc:
                 return self.shred()
 
