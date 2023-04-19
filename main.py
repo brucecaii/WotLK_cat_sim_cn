@@ -963,7 +963,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='comet_trail'
+            value='dark_matter'
         )),
     ]),
     html.Div([
