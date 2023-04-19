@@ -676,7 +676,20 @@ iteration_input = dbc.Col([
                 value=15, min=0, step=1, type='number', id='berserk_ff_thresh'
             ),
         ],
-        style={'width': '67%'}
+        style={'width': '67%', 'marginBottom': '1.5%'}
+    ),
+    dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(
+                'Max allowed FF delay to fit in damage casts:',
+                addon_type='prepend'
+            ),
+            dbc.Input(
+                value=0.7, min=0, step=0.1, type='number', id='max_ff_delay'
+            ),
+            dbc.InputGroupAddon('seconds', addon_type='append')
+        ],
+        style={'width': '75%'}
     ),
     html.Br(),
     dbc.Checklist(
@@ -953,6 +966,51 @@ iteration_input = dbc.Col([
             value='comet_trail'
         )),
     ]),
+    html.Div([
+        dbc.Row([
+            dbc.Col(
+                dcc.Markdown('Put trinket on ICD (ignored if 0)'),
+                id="trinket_icd_text_1"
+            ),
+            dbc.Col(
+                dcc.Markdown('Put trinket on ICD (ignored if 0)'),
+                id="trinket_icd_text_2"
+            ),
+        ], style={'marginTop': '1.5%', 'marginBottom': '-2%'}),
+        dbc.Row([
+            dbc.Col(dbc.InputGroup(
+                [
+                    dbc.Input(
+                        value=0.0, min=0.0, step=0.5, type='number', 
+                        id='trinket_icd_precombat_1',
+                    ),
+                    dbc.InputGroupAddon(
+                        'seconds before combat', addon_type='append'
+                    ),
+                ],
+                id="trinket_icd_group_1"
+            )),
+            dbc.Col(dbc.InputGroup(
+                [
+                    dbc.Input(
+                        value=0.0, min=0.0, step=0.5, type='number', 
+                        id='trinket_icd_precombat_2',
+                    ),
+                    dbc.InputGroupAddon(
+                        'seconds before combat', addon_type='append'
+                    ),
+                ],
+                id="trinket_icd_group_2"
+            )),
+        ]),
+    ], id="trinket_icd_section"),
+    dbc.Tooltip(
+        """Putting a trinket on ICD (internal cooldown) will prevent the trinket
+            from activating until its cooldown has ended. This can be useful when
+            attempting to line up trinket procs with other combat effects. Typically
+            done by equipping trinkets before combat.""",
+        target="trinket_icd_section"
+    ),
     html.Div(
         '*确保你的配装文件里没有选神像和饰品,不然属性会错',
         style={
@@ -1321,7 +1379,7 @@ app.layout = html.Div([
 # Helper functions used in master callback
 def process_trinkets(
         trinket_1, trinket_2, player, ap_mod, stat_mod, haste_multiplier,
-        cd_delay
+        cd_delay, trinket_icd_precombat_1, trinket_icd_precombat_2
 ):
     proc_trinkets = []
     all_trinkets = []
@@ -1411,14 +1469,16 @@ def process_trinkets(
                 active_stats['chance_on_hit'] = ppm/60.
                 active_stats['yellow_chance_on_hit'] = ppm/60.
 
+            icd_precombat = trinket_icd_precombat_1 if trinket == trinket_1 else trinket_icd_precombat_2 if trinket == trinket_2 else 0.0
+
             if trinket_params['type'] == 'instant_damage':
-                trinket_obj = trinkets.InstantDamageProc(**active_stats)
+                trinket_obj = trinkets.InstantDamageProc(**active_stats, icd_precombat=icd_precombat)
             elif trinket_params['type'] == 'refreshing_proc':
                 trinket_obj = trinkets.RefreshingProcTrinket(**active_stats)
             elif trinket_params['type'] == 'stacking_proc':
                 trinket_obj = trinkets.StackingProcTrinket(**active_stats)
             else:
-                trinket_obj = trinkets.ProcTrinket(**active_stats)
+                trinket_obj = trinkets.ProcTrinket(**active_stats, icd_precombat=icd_precombat)
 
             all_trinkets.append(trinket_obj)
             proc_trinkets.append(all_trinkets[-1])
@@ -1782,6 +1842,8 @@ def plot_new_trajectory(sim, show_whites):
     Input('imp_motw', 'value'),
     Input('trinket_1', 'value'),
     Input('trinket_2', 'value'),
+    Input('trinket_icd_precombat_1', 'value'),
+    Input('trinket_icd_precombat_2', 'value'),
     Input('run_button', 'n_clicks'),
     Input('weight_button', 'n_clicks'),
     Input('graph_button', 'n_clicks'),
@@ -1818,6 +1880,7 @@ def plot_new_trajectory(sim, show_whites):
     State('bearweave', 'value'),
     State('berserk_bite_thresh', 'value'),
     State('berserk_ff_thresh', 'value'),
+    State('max_ff_delay', 'value'),
     State('lacerate_prio', 'value'),
     State('lacerate_time', 'value'),
     State('powerbear', 'value'),
@@ -1832,7 +1895,8 @@ def plot_new_trajectory(sim, show_whites):
     State('show_whites', 'checked'))
 def compute(
         json_file, consumables, raid_buffs, other_buffs, raven_idol,
-        stat_debuffs, imp_motw, trinket_1, trinket_2, run_clicks,
+        stat_debuffs, imp_motw, trinket_1, trinket_2, trinket_icd_precombat_1, 
+        trinket_icd_precombat_2, run_clicks, 
         weight_clicks, graph_clicks, hot_uptime, potion, bonuses,
         binary_talents, feral_aggression, savage_fury, potp,
         predatory_instincts, improved_mangle, furor, naturalist,
@@ -1841,9 +1905,9 @@ def compute(
         min_roar_offset, roar_clip_leeway, use_rake, mangle_spam,
         use_biteweave, bite_model, bite_time, bear_mangle, prepop_berserk,
         preproc_omen, bearweave, berserk_bite_thresh, berserk_ff_thresh,
-        lacerate_prio, lacerate_time, powerbear, snek, flowershift,
-        gotw_targets, daggerweave, dagger_ep_loss, num_replicates, latency,
-        epic_gems, show_whites
+        max_ff_delay, lacerate_prio, lacerate_time, powerbear, snek,
+        flowershift, gotw_targets, daggerweave, dagger_ep_loss, num_replicates,
+        latency, epic_gems, show_whites
 ):
     ctx = dash.callback_context
 
@@ -1956,7 +2020,7 @@ def compute(
     # Process trinkets
     trinket_list = process_trinkets(
         trinket_1, trinket_2, player, ap_mod, stat_mod, haste_multiplier,
-        cd_delay
+        cd_delay, trinket_icd_precombat_1, trinket_icd_precombat_2
     )
 
     # Default output is just the buffed player stats with no further calcs
@@ -2062,13 +2126,14 @@ def compute(
         use_berserk='berserk' in binary_talents,
         prepop_berserk=bool(prepop_berserk), preproc_omen=bool(preproc_omen),
         bearweave=bool(bearweave), berserk_bite_thresh=berserk_bite_thresh,
-        berserk_ff_thresh=berserk_ff_thresh, lacerate_prio=bool(lacerate_prio),
-        lacerate_time=lacerate_time, powerbear=bool(powerbear),
-        snek=bool(snek) and bool(bearweave), flowershift=bool(flowershift),
-        daggerweave=bool(daggerweave), dagger_ep_loss=dagger_ep_loss,
-        min_roar_offset=min_roar_offset, roar_clip_leeway=roar_clip_leeway,
-        trinkets=trinket_list, haste_multiplier=haste_multiplier,
-        hot_uptime=hot_uptime / 100., mangle_idol=mangle_idol
+        berserk_ff_thresh=berserk_ff_thresh, max_ff_delay=max_ff_delay,
+        lacerate_prio=bool(lacerate_prio), lacerate_time=lacerate_time,
+        powerbear=bool(powerbear), snek=bool(snek) and bool(bearweave),
+        flowershift=bool(flowershift), daggerweave=bool(daggerweave),
+        dagger_ep_loss=dagger_ep_loss, min_roar_offset=min_roar_offset,
+        roar_clip_leeway=roar_clip_leeway, trinkets=trinket_list,
+        haste_multiplier=haste_multiplier, hot_uptime=hot_uptime / 100.,
+        mangle_idol=mangle_idol
     )
     sim.set_active_debuffs(boss_debuffs)
     player.calc_damage_params(**sim.params)
@@ -2139,8 +2204,8 @@ def disable_options(
     }
 
     # Disable Lacerateweave and flowershift in UI given recent Blizzard changes
-    flowershift_options['disabled'] = True
-    bearweave_options['disabled'] = False
+    flowershift_options['disabled'] = bool(bearweave)
+    bearweave_options['disabled'] = bool(flowershift)
     lacerate_options['disabled'] = True
 
     return (
@@ -2149,7 +2214,29 @@ def disable_options(
         bool(lacerate_prio), [bearweave_options], [lacerate_options],
         [flowershift_options], bool(flowershift), bool(daggerweave)
     )
-
+    
+#Callback for displaying trinket ICD options when appropriate
+@app.callback(
+    Output('trinket_icd_text_1', 'style'),
+    Output('trinket_icd_group_1', 'style'),
+    Output('trinket_icd_text_2', 'style'),
+    Output('trinket_icd_group_2', 'style'),
+    Output('trinket_icd_precombat_1', 'value'),
+    Output('trinket_icd_precombat_2', 'value'),
+    Input('trinket_1', 'value'),
+    Input('trinket_2', 'value'),
+    Input('trinket_icd_precombat_1', 'value'),
+    Input('trinket_icd_precombat_2', 'value'),)
+def show_trinket_ICD_options(trinket_1, trinket_2, trinket_icd_precombat_1, trinket_icd_precombat_2):
+    show_trinket_1_ICD = trinket_1 != 'none' and trinkets.trinket_library[trinket_1]['type'] in ['proc','instant_damage']
+    show_trinket_2_ICD = trinket_2 != 'none' and trinkets.trinket_library[trinket_2]['type'] in ['proc','instant_damage']
+    trinket_1_style = {} if show_trinket_1_ICD else {'visibility':'hidden'} 
+    trinket_2_style = {} if show_trinket_2_ICD else {'visibility':'hidden'}
+    if not show_trinket_1_ICD:
+        trinket_icd_precombat_1 = 0
+    if not show_trinket_2_ICD:
+        trinket_icd_precombat_2 = 0
+    return (trinket_1_style, trinket_1_style, trinket_2_style, trinket_2_style, trinket_icd_precombat_1, trinket_icd_precombat_2)
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
