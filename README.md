@@ -22,6 +22,15 @@ Github https://github.com/eeveecc/WotLK_cat_sim_cn
 2023.02.21 更新补丁饰品数值,面板破甲,破甲食物
 2023.03.18 更新P3数据,更新循环算法和服务器延迟
 2024.04.12 更新BUFF后的猫循环优化
+2024.04.19 更新P4(T10)效果,增加卡饰品功能,增加精灵火延迟选项,修复BUG
+```
+
+## 开发
+
+本地使用/开发确保python3安装好后
+```
+pip install -r requirements.txt
+python -m main
 ```
 
 ## Compile

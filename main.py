@@ -117,7 +117,7 @@ buffs_1 = dbc.Col(
                   {'label': '熏烤龙鳞鱼(40敏捷)', 'value': 'agi_food'},
                   {'label': '龙鳞鱼片(40力量)', 'value': 'str_food'},
                   {'label': '犀牛大餐(40破甲)', 'value': 'arp_food'}],
-         value=['flask', 'arp_food'],
+         value=['flask', 'agi_food'],
          id='consumables'
     ),
         html.Br(),
@@ -131,6 +131,10 @@ buffs_1 = dbc.Col(
              {
                  'label': '力量祝福/战斗怒吼',
                  'value': 'might'
+             },
+             {
+                 'label': '智慧祝福',
+                 'value': 'wisdom'
              },
              {
                  'label': '野性赐福',
@@ -149,10 +153,6 @@ buffs_1 = dbc.Col(
                  'value': 'unleashed_rage'
              },
              {
-                 'label': '智慧祝福',
-                 'value': 'wisdom'
-             },
-             {
                  'label': '奥术智慧',
                  'value': 'ai'
              },
@@ -163,7 +163,7 @@ buffs_1 = dbc.Col(
          ],
          value=[
              'kings', 'might', 'wisdom', 'motw', 'str_totem', 'unleashed_rage',
-             'ai', 'heroic_presence', 'spirit'
+             'ai', 'spirit'
          ],
          id='raid_buffs'
     ),
@@ -212,7 +212,7 @@ buffs_1 = dbc.Col(
     ),
         html.Br(),
         html.H5('神像,雕文,以及其他特殊增益'),
-        html.H5('(选择双神像开启高阶神像舞)'),
+        html.H5('(选择腐蚀者和凶兽会打完第一个裂伤后更换神像)'),
         dbc.Checklist(
         options=[{'label': '乌鸦神像', 'value': 'raven'}],
         value=[], id='raven_idol'
@@ -306,7 +306,7 @@ encounter_details = dbc.Col(
                  'label': '十字军之心/毒物大师',
                  'value': 'jotc'
              },
-             {'label': '智慧祝福', 'value': 'jow'},
+             {'label': '智慧审判', 'value': 'jow'},
              {'label': '悲惨 / 强化精灵火', 'value': 'misery'},
              {
                  'label': '暗影掌握 / 强化灼烧 / 深冬之寒',
@@ -367,7 +367,7 @@ encounter_details = dbc.Col(
                  {'label': '4', 'value': 4},
                  {'label': '5', 'value': 5},
              ],
-             value=4, id='feral_aggression',
+             value=5, id='feral_aggression',
              style={
                  'width': '20%', 'display': 'inline-block',
                  'marginBottom': '2.5%', 'marginRight': '5%'
@@ -557,7 +557,7 @@ encounter_details = dbc.Col(
                     {'label': '1', 'value': 1},
                     {'label': '2', 'value': 2},
                 ],
-                value=2, id='ilotp',
+                value=1, id='ilotp',
                 style={
                     'width': '20%', 'display': 'inline-block',
                     'marginBottom': '2.5%', 'marginRight': '5%'
@@ -644,27 +644,21 @@ iteration_input = dbc.Col([
             dbc.Input(
                 value=24, min=0, step=1, type='number', id='min_roar_offset'
             ),
-            dbc.InputGroupAddon('秒', addon_type='append')
+            dbc.InputGroupAddon('秒(4T8为34秒,其他24秒)', addon_type='append')
         ],
-        style={'width': '65%', 'marginBottom': '1.5%'}
-    ),
-    html.Div(
-        '*非4T8为24秒,4T8为34秒',
-        style={
-            'marginTop': '2.5%', 'fontSize': 'medium', 'fontWeight': 'bold'
-        },
+        style={'width': '100%', 'marginBottom': '1.5%'}
     ),
     dbc.InputGroup(
         [
             dbc.InputGroupAddon(
-                '割裂Leeway延迟设置(咆哮覆盖):', addon_type='prepend'
+                '割裂余地(Leeway)延迟设置:', addon_type='prepend'
             ),
             dbc.Input(
                 value=3, min=0, step=1, type='number', id='roar_clip_leeway'
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
-        style={'width': '67%', 'marginBottom': '1.5%'}
+        style={'width': '100%', 'marginBottom': '1.5%'}
     ),
     dbc.InputGroup(
         [
@@ -676,12 +670,12 @@ iteration_input = dbc.Col([
                 value=15, min=0, step=1, type='number', id='berserk_ff_thresh'
             ),
         ],
-        style={'width': '67%', 'marginBottom': '1.5%'}
+        style={'width': '100%', 'marginBottom': '1.5%'}
     ),
     dbc.InputGroup(
         [
             dbc.InputGroupAddon(
-                'Max allowed FF delay to fit in damage casts:',
+                '最高精灵火延迟:',
                 addon_type='prepend'
             ),
             dbc.Input(
@@ -689,7 +683,7 @@ iteration_input = dbc.Col([
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
-        style={'width': '75%'}
+        style={'width': '100%'}
     ),
     html.Br(),
     dbc.Checklist(
@@ -721,7 +715,7 @@ iteration_input = dbc.Col([
                     dbc.Select(
                         options=[
                             {'label': '智能分析判定', 'value': 'analytical'},
-                            {'label': '固定判定', 'value': 'empirical'}
+                            {'label': '经验判定(最优)', 'value': 'empirical'}
                         ],
                         value='empirical', id='bite_model'
                     ),
@@ -741,9 +735,6 @@ iteration_input = dbc.Col([
                             dbc.Input(
                                 type='number', value=4, id='bite_time',
                                 min=0, step=1
-                            ),
-                            dbc.InputGroupAddon(
-                                '秒时(熊猫舞10秒最佳,爪凶流3秒)', addon_type='append'
                             )
                         ],
                         style={
@@ -769,7 +760,7 @@ iteration_input = dbc.Col([
         options=[{
             'label': '熊T和武器战负责流血Debuff',
             'value': 'bear_mangle'
-        }], value=['bear_mangle'], id='bear_mangle'
+        }], value=[], id='bear_mangle'
     ),
     dbc.Collapse(
         [
@@ -910,7 +901,7 @@ iteration_input = dbc.Col([
         dbc.Col(dbc.Select(
             id='trinket_1',
             options=[
-                {'label': 'Empty', 'value': 'none'},
+                {'label': '----空----', 'value': 'none'},
                 {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
                 {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
@@ -939,7 +930,7 @@ iteration_input = dbc.Col([
         dbc.Col(dbc.Select(
             id='trinket_2',
             options=[
-                {'label': 'Empty', 'value': 'none'},
+                {'label': '----空----', 'value': 'none'},
                 {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
                 {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
@@ -969,11 +960,11 @@ iteration_input = dbc.Col([
     html.Div([
         dbc.Row([
             dbc.Col(
-                dcc.Markdown('Put trinket on ICD (ignored if 0)'),
+                dcc.Markdown('战前饰品CD(默认0)'),
                 id="trinket_icd_text_1"
             ),
             dbc.Col(
-                dcc.Markdown('Put trinket on ICD (ignored if 0)'),
+                dcc.Markdown('战前饰品CD(默认0)'),
                 id="trinket_icd_text_2"
             ),
         ], style={'marginTop': '1.5%', 'marginBottom': '-2%'}),
@@ -985,7 +976,7 @@ iteration_input = dbc.Col([
                         id='trinket_icd_precombat_1',
                     ),
                     dbc.InputGroupAddon(
-                        'seconds before combat', addon_type='append'
+                        '秒', addon_type='append'
                     ),
                 ],
                 id="trinket_icd_group_1"
@@ -997,7 +988,7 @@ iteration_input = dbc.Col([
                         id='trinket_icd_precombat_2',
                     ),
                     dbc.InputGroupAddon(
-                        'seconds before combat', addon_type='append'
+                        '秒', addon_type='append'
                     ),
                 ],
                 id="trinket_icd_group_2"
@@ -1038,7 +1029,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.0',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.1',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -1046,7 +1037,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='更新于2023.04.12 增强猫版本 支持P4数据 (缺饰品和神像)',
+        children='更新于2023.04.19 增强猫版本 支持P4数据 (缺饰品和神像)',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
@@ -1250,7 +1241,7 @@ sim_output = dbc.Col([
 ], style={'marginLeft': '2.5%', 'marginBottom': '2.5%'}, width=4, xl=3)
 
 weights_section = dbc.Col([
-    html.H4('属性权重分析(>2万样本,10万最佳)'),
+    html.H4('属性权重分析(15万以上样本)'),
     html.Div([
         dbc.Row(
             [
@@ -1267,7 +1258,7 @@ weights_section = dbc.Col([
                                     className='form-check-input', checked=False
                                 ),
                                 dbc.Label(
-                                    '史诗宝石',
+                                    '装备配紫色宝石',
                                     html_for='epic_gems',
                                     className='form-check-label'
                                 )
@@ -2194,9 +2185,9 @@ def disable_options(
     bearweave, flowershift, biteweave, bite_model, lacerate_prio, daggerweave,
     binary_talents
 ):
-    bearweave_options = {'label': '熊猫舞流派', 'value': 'bearweave'}
+    bearweave_options = {'label': '尝试精裂舞', 'value': 'bearweave'}
     flowershift_options = {
-        'label': '爪子舞流派', 'value': 'flowershift'
+        'label': '尝试爪子舞', 'value': 'flowershift'
     }
     lacerate_options = {
         'label': ' prioritize Lacerate maintenance over Mangle',
@@ -2241,5 +2232,5 @@ def show_trinket_ICD_options(trinket_1, trinket_2, trinket_icd_precombat_1, trin
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     app.run_server(
-        host='0.0.0.0', port=8080, debug=False
+        host='0.0.0.0', port=8080, debug=True
     )
