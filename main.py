@@ -2232,5 +2232,5 @@ def show_trinket_ICD_options(trinket_1, trinket_2, trinket_icd_precombat_1, trin
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     app.run_server(
-        host='0.0.0.0', port=8080, debug=True
+        host='0.0.0.0', port=8080, debug=False
     )
