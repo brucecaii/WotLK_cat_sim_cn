@@ -1036,7 +1036,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.1',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.2',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -1044,7 +1044,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='更新于2023.04.19 增强猫版本 支持P4数据 (缺饰品和神像)',
+        children='2023.04.25',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
