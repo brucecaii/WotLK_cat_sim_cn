@@ -38,4 +38,5 @@ python -m main
 ## Compile
 
 Linux: `pyinstaller -F main.py player.py sim_utils.py trinkets.py wotlk_cat_sim.py`
+
 Windows: `python -m PyInstaller -F main.py player.py sim_utils.py trinkets.py wotlk_cat_sim.py`
