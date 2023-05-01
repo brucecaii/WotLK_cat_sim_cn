@@ -191,7 +191,7 @@ class Simulation():
 
     def __init__(
         self, player, fight_length, latency, trinkets=[], haste_multiplier=1.0,
-        hot_uptime=0.0, mangle_idol=None, **kwargs
+        hot_uptime=0.0, mangle_idol=None, rake_idol=None, **kwargs
     ):
         """Initialize simulation.
 
@@ -213,6 +213,8 @@ class Simulation():
             mangle_idol (trinkets.ProcTrinket): Optional Mangle proc Idol to
                 use. If supplied, then Mangle Idol swaps will be configured
                 automatically if appropriate.
+            rake_idol (trinkets.ProcTrinket): Optional Rake/Lacerate proc Idol
+                to use.
             kwargs (dict): Key, value pairs for all other encounter parameters,
                 including boss armor, relevant debuffs, and player stregy
                 specification. An error will be thrown if the parameter is not
@@ -224,6 +226,7 @@ class Simulation():
         self.latency = latency
         self.trinkets = trinkets
         self.mangle_idol = mangle_idol
+        self.rake_idol = rake_idol
         self.params = copy.deepcopy(self.default_params)
         self.strategy = copy.deepcopy(self.default_strategy)
 
@@ -1102,10 +1105,27 @@ class Simulation():
         )
         bite_at_end = (cp >= bite_cp) and (block_rip_now or block_rip_next)
 
+        # Clip Mangle if it won't change the total number of Mangles we have to
+        # cast before the fight ends.
+        mangle_refresh_now = (
+            (not self.mangle_debuff) and (time < self.fight_length - 1.0)
+        )
+        mangle_refresh_pending = (
+            self.mangle_debuff and (self.mangle_end < self.fight_length - 1.0)
+        )
+        clip_mangle = False
+
+        if mangle_refresh_pending:
+            num_mangles_remaining = (
+                1 + (self.fight_length - 1.0 - self.mangle_end) // 60
+            )
+            earliest_mangle = self.fight_length - num_mangles_remaining * 60
+            clip_mangle = (time >= earliest_mangle)
+
         mangle_now = (
-            (not rip_now) and (not self.mangle_debuff)
+            (not rip_now) and (not self.strategy['aoe'])
+            and (mangle_refresh_now or clip_mangle)
             # and (not self.player.omen_proc)
-            and (not self.strategy['aoe'])
         )
         aoe_mangle = (
             self.strategy['aoe'] and self.mangle_idol and (cp == 0) and
@@ -1182,6 +1202,7 @@ class Simulation():
         # rotations prioritize weave cpm over Rake uptime.
         pool_for_rake = (
             not (self.strategy['bearweave'] or self.strategy['flowershift'])
+            or self.player.t10_4p_bonus
         )
 
         # Berserk algorithm: time Berserk for just after a Tiger's Fury
@@ -1274,7 +1295,7 @@ class Simulation():
                 pending_actions.append((self.rake_end, 17.5 * pool_for_rake))
             else:
                 pending_actions.append((self.rake_end, 35 * pool_for_rake))
-        if self.mangle_debuff and (self.mangle_end < self.fight_length - 1):
+        if mangle_refresh_pending:
             base_cost = self.player._mangle_cost
             if self.berserk_expected_at(time, self.mangle_end):
                 pending_actions.append((self.mangle_end, 0.5 * base_cost))
@@ -1535,14 +1556,14 @@ class Simulation():
             if energy >= self.player.bite_cost:
                 return self.player.bite()
             time_to_next_action = (self.player.bite_cost - energy) / 10.
-        elif rake_now and (not wait_for_ff):
-            if (energy >= self.player.rake_cost) or self.player.omen_proc:
-                return self.rake(time)
-            time_to_next_action = (self.player.rake_cost - energy) / 10.
         elif mangle_now and (not wait_for_ff):
             if (energy >= mangle_cost) or self.player.omen_proc:
                 return self.mangle(time)
             time_to_next_action = (mangle_cost - energy) / 10.
+        elif rake_now and (not wait_for_ff):
+            if (energy >= self.player.rake_cost) or self.player.omen_proc:
+                return self.rake(time)
+            time_to_next_action = (self.player.rake_cost - energy) / 10.
         elif bearweave_now:
             self.player.ready_to_shift = True
         elif flowershift_now and (energy < 42):
@@ -1988,6 +2009,10 @@ class Simulation():
                 )
                 self.rake_ticks.pop(0)
 
+                if self.rake_idol:
+                    self.rake_idol.check_for_proc(False, True)
+                    self.rake_idol.update(time, self.player, self)
+
             # Check if Rake fell off
             if self.rake_debuff and (time > self.rake_end - 1e-9):
                 self.rake_debuff = False
@@ -2006,6 +2031,10 @@ class Simulation():
                     'Lacerate', False, time
                 )
                 self.lacerate_ticks.pop(0)
+
+                if self.rake_idol:
+                    self.rake_idol.check_for_proc(False, True)
+                    self.rake_idol.update(time, self.player, self)
 
             # Check if Lacerate fell off
             if self.lacerate_debuff and (time > self.lacerate_end - 1e-9):

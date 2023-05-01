@@ -222,6 +222,7 @@ buffs_1 = dbc.Col(
             {'label': '凶兽神像', 'value': 'shred_idol'},
             {'label': '膜拜神像', 'value': 'rip_idol'},
             {'label': '残毁神像', 'value': 'idol_of_mutilation'},
+            {'label': '泣月神像', 'value': 'rake_idol'},
             {'label': '腐蚀者神像', 'value': 'mangle_idol'},
             {'label': '裂伤雕文', 'value': 'mangle_glyph'},
             {'label': '割裂雕文', 'value': 'rip_glyph'},
@@ -909,6 +910,8 @@ iteration_input = dbc.Col([
             id='trinket_1',
             options=[
                 {'label': '----空----', 'value': 'none'},
+                {'label': "死神的意志(H)", 'value': 'dbw'},
+                {'label': '密语尖牙颅骨(H)','value': 'whispering_fanged_skull'},
                 {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
                 {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
@@ -938,6 +941,8 @@ iteration_input = dbc.Col([
             id='trinket_2',
             options=[
                 {'label': '----空----', 'value': 'none'},
+                {'label': "死神的意志(H)", 'value': 'dbw'},
+                {'label': '密语尖牙颅骨(H)','value': 'whispering_fanged_skull'},
                 {'label': '死亡的裁决(H)', 'value': 'deaths_verdict_heroic'},
                 {'label': '死亡的裁决(N)','value': 'deaths_verdict_normal'},
                 {'label': '彗星之痕', 'value': 'comet_trail'},
@@ -1036,7 +1041,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.2',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.3',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -1044,7 +1049,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='2023.04.25',
+        children='2023.05.02',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
@@ -1382,7 +1387,7 @@ def process_trinkets(
     proc_trinkets = []
     all_trinkets = []
 
-    for trinket in [trinket_1, trinket_2]:
+    for slot, trinket in enumerate([trinket_1, trinket_2]):
         if trinket == 'none':
             continue
 
@@ -1467,16 +1472,28 @@ def process_trinkets(
                 active_stats['chance_on_hit'] = ppm/60.
                 active_stats['yellow_chance_on_hit'] = ppm/60.
 
-            icd_precombat = trinket_icd_precombat_1 if trinket == trinket_1 else trinket_icd_precombat_2 if trinket == trinket_2 else 0.0
+            if slot == 0:
+                icd_precombat = trinket_icd_precombat_1
+            else:
+                icd_precombat = trinket_icd_precombat_2
 
-            if trinket_params['type'] == 'instant_damage':
-                trinket_obj = trinkets.InstantDamageProc(**active_stats, icd_precombat=icd_precombat)
+            if trinket == 'dbw':
+                trinket_obj = trinkets.DeathbringersWill(
+                    stat_mod, ap_mod, icd_precombat=icd_precombat,
+                    **active_stats
+                )
+            elif trinket_params['type'] == 'instant_damage':
+                trinket_obj = trinkets.InstantDamageProc(
+                    **active_stats, icd_precombat=icd_precombat
+                )
             elif trinket_params['type'] == 'refreshing_proc':
                 trinket_obj = trinkets.RefreshingProcTrinket(**active_stats)
             elif trinket_params['type'] == 'stacking_proc':
                 trinket_obj = trinkets.StackingProcTrinket(**active_stats)
             else:
-                trinket_obj = trinkets.ProcTrinket(**active_stats, icd_precombat=icd_precombat)
+                trinket_obj = trinkets.ProcTrinket(
+                    **active_stats, icd_precombat=icd_precombat
+                )
 
             all_trinkets.append(trinket_obj)
             proc_trinkets.append(all_trinkets[-1])
@@ -2118,6 +2135,22 @@ def compute(
         trinket_list.append(mangle_idol)
         player.proc_trinkets.append(mangle_idol)
 
+    rake_idol = None
+
+    if 'rake_idol' in bonuses:
+        agi_gain = 44. * stat_mod
+        stack_increments = np.array([
+            agi_gain, agi_gain * ap_mod, agi_gain / 83.33 / 100.
+        ])
+        rake_idol = trinkets.StackingProcTrinket(
+            stat_name=['agility', 'attack_power', 'crit_chance'],
+            stat_increment=stack_increments, max_stacks=5,
+            aura_name='Idol of the Crying Moon', stack_name='Agile',
+            chance_on_hit=0.0, yellow_chance_on_hit=1.0, aura_duration=1e9,
+            cooldown=1e9
+        )
+        trinket_list.append(rake_idol)
+
     target_count = int(round(num_targets))
     allow_bearweave = bool(bearweave) and (target_count < 3)
     sim = ccs.Simulation(
@@ -2135,7 +2168,8 @@ def compute(
         dagger_ep_loss=dagger_ep_loss, min_roar_offset=min_roar_offset,
         roar_clip_leeway=roar_clip_leeway, num_targets=target_count,
         trinkets=trinket_list, haste_multiplier=haste_multiplier,
-        hot_uptime=hot_uptime / 100., mangle_idol=mangle_idol
+        hot_uptime=hot_uptime / 100., mangle_idol=mangle_idol,
+        rake_idol=rake_idol
     )
     sim.set_active_debuffs(boss_debuffs)
     player.calc_damage_params(**sim.params)
