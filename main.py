@@ -25,36 +25,35 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 default_input_stats = {
-        "agility": 1456,
-        "armor": 6675,
-        "armorPen": 43,
-        "armorPenRating": 602,
-        "attackPower": 8543,
-        "crit": 53.34,
-        "critRating": 615,
+        "agility": 1690,
+        "armor": 7288,
+        "armorPen": 43.21,
+        "armorPenRating": 605,
+        "attackPower": 9050,
+        "crit": 59.96,
+        "critRating": 790,
         "critReduction": 6,
         "defense": 400,
-        "dodge": 40,
-        "expertise": 25,
-        "expertiseRating": 126,
-        "feralAttackPower": 3001,
-        "haste": 10.94,
-        "hasteRating": 276,
-        "health": 21517,
-        "hit": 6.89,
-        "hitRating": 226,
-        "intellect": 206,
-        "mainHandSpeed": 2.4,
-        "mana": 6306,
-        "natureResist": 10,
+        "dodge": 44.88,
+        "expertise": 26,
+        "expertiseRating": 139,
+        "feralAttackPower": 3175,
+        "haste": 18.2,
+        "hasteRating": 459,
+        "health": 23837,
+        "hit": 7.01,
+        "hitRating": 230,
+        "intellect": 211,
+        "mainHandSpeed": 3.5,
+        "mana": 6381,
         "parry": 5,
-        "spellCrit": 16.48,
-        "spellCritRating": 615,
-        "spellHaste": 8.42,
-        "spellHit": 8.62,
-        "spirit": 189,
-        "stamina": 1428,
-        "strength": 251
+        "spellCrit": 20.33,
+        "spellCritRating": 790,
+        "spellHaste": 14,
+        "spellHit": 8.77,
+        "spirit": 193,
+        "stamina": 1660,
+        "strength": 189
 }
 
 stat_input = dbc.Col([
@@ -243,10 +242,11 @@ buffs_1 = dbc.Col(
             {'label': '武器猫鼬', 'value': 'mongoose'},
             {'label': '武器狂暴', 'value': 'berserking'},
             {'label': '手套加速器', 'value': 'engi_gloves'},
+            {'label': '剑刃刺绣', 'value': 'ap_cloak'},
         ],
         value=[
-            'shred_idol', 'mangle_idol', 'rip_glyph', 'shred_glyph',
-            'roar_glyph', 't8_2p', 'meta', 'berserking', 'engi_gloves'
+            'idol_of_mutilation', 'shred_glyph', 'roar_glyph', 't9_2p',
+            't9_4p', 'meta', 'berserking', 'engi_gloves'
         ],
         id='bonuses'
     ),
@@ -332,9 +332,9 @@ encounter_details = dbc.Col(
              {'label': '狂乱', 'value': 'unholy_frenzy'},
              {'label': '碎裂投掷', 'value': 'shattering_throw'},
          ],
-         value=['lust', 'shattering_throw'], id='cooldowns',
-    ),
-        dbc.InputGroup(
+         value=['lust'], id='cooldowns',
+     ),
+     dbc.InputGroup(
          [
              dbc.InputGroupAddon('药水', addon_type='prepend'),
              dbc.Select(
@@ -650,7 +650,7 @@ iteration_input = dbc.Col([
                 '保持咆哮和割间隔', addon_type='prepend'
             ),
             dbc.Input(
-                value=24, min=0, step=1, type='number', id='min_roar_offset'
+                value=25, min=0, step=1, type='number', id='min_roar_offset'
             ),
             dbc.InputGroupAddon('秒(4T8为34秒,其他24秒)', addon_type='append')
         ],
@@ -662,7 +662,7 @@ iteration_input = dbc.Col([
                 '割裂余地(Leeway)延迟设置:', addon_type='prepend'
             ),
             dbc.Input(
-                value=3, min=0, step=1, type='number', id='roar_clip_leeway'
+                value=4, min=0, step=1, type='number', id='roar_clip_leeway'
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
@@ -687,7 +687,7 @@ iteration_input = dbc.Col([
                 addon_type='prepend'
             ),
             dbc.Input(
-                value=0.7, min=0, step=0.1, type='number', id='max_ff_delay'
+                value=0.1, min=0, step=0.1, type='number', id='max_ff_delay'
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
@@ -966,7 +966,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='dark_matter'
+            value='deaths_verdict_heroic'
         )),
     ]),
     html.Div([
@@ -1041,7 +1041,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.3',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.4',
         style={'textAlign': 'center'}
     ),
     html.H5(
@@ -1049,7 +1049,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='2023.05.02',
+        children='2023.05.14',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
@@ -1267,7 +1267,7 @@ weights_section = dbc.Col([
                             [
                                 dbc.Checkbox(
                                     id='epic_gems',
-                                    className='form-check-input', checked=False
+                                    className='form-check-input', checked=True
                                 ),
                                 dbc.Label(
                                     '装备配紫色宝石',
@@ -1732,13 +1732,13 @@ def run_sim(sim, num_replicates):
         ]))
 
     return (
-        avg_dps,
+        dps_vals,
         (mean_dps_str, median_dps_str, oom_time_str, dps_table, aura_table),
     )
 
 
 def calc_weights(
-        sim, num_replicates, avg_dps, time_to_oom, kings, unleashed_rage,
+        sim, num_replicates, dps_vals, time_to_oom, kings, unleashed_rage,
         epic_gems, imp_motw
 ):
     # Check that sufficient iterations are used for convergence.
@@ -1755,12 +1755,12 @@ def calc_weights(
     # Calculate DPS increases and weights
     stat_multiplier = (1 + 0.1 * kings) * 1.06 * (1 + 0.01 * imp_motw)
     dps_deltas, stat_weights = sim.calc_stat_weights(
-        num_replicates, base_dps=avg_dps, agi_mod=stat_multiplier
+        num_replicates, base_dps_sample=dps_vals, agi_mod=stat_multiplier
     )
 
     # Parse results
     for stat in dps_deltas:
-        if stat == '1 AP':
+        if stat == 'Attack Power':
             weight = 1.0
             dps_per_AP = dps_deltas[stat]
         else:
@@ -1774,7 +1774,7 @@ def calc_weights(
 
     # Generate 80upgrades import link for raw stats
     url = sim_utils.gen_import_link(
-        stat_weights, multiplier=stat_multiplier, epic_gems=epic_gems
+        dps_deltas, multiplier=stat_multiplier, epic_gems=epic_gems
     )
     link = html.A('Eighty Upgrades Import Link', href=url, target='_blank')
 
@@ -2124,6 +2124,14 @@ def compute(
             'haste_rating', 340, 'Hyperspeed Acceleration', 12, 60,
             delay=cd_delay
         ))
+    if 'ap_cloak' in bonuses:
+        swordguard_embroidery = trinkets.ProcTrinket(
+            stat_name='attack_power', stat_increment=400 * ap_mod,
+            proc_name='Swordguard Embroidery', chance_on_hit=0.20,
+            proc_duration=15, cooldown=55, chance_on_crit=0.2
+        )
+        trinket_list.append(swordguard_embroidery)
+        player.proc_trinkets.append(swordguard_embroidery)
 
     if potion == 'haste':
         trinket_list.append(trinkets.HastePotion(delay=cd_delay))
@@ -2179,7 +2187,7 @@ def compute(
     if (ctx.triggered and
             (ctx.triggered[0]['prop_id'] in
              ['run_button.n_clicks', 'weight_button.n_clicks'])):
-        avg_dps, dps_output = run_sim(sim, num_replicates)
+        dps_vals, dps_output = run_sim(sim, num_replicates)
     else:
         dps_output = ('', '', '', [], [])
 
@@ -2187,7 +2195,7 @@ def compute(
     if (ctx.triggered and
             (ctx.triggered[0]['prop_id'] == 'weight_button.n_clicks')):
         weights_output = calc_weights(
-            sim, num_replicates, avg_dps, dps_output[2], kings, unleashed_rage,
+            sim, num_replicates, dps_vals, dps_output[2], kings, unleashed_rage,
             epic_gems, imp_motw
         )
     else:
