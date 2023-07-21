@@ -192,7 +192,7 @@ class Simulation():
 
     def __init__(
         self, player, fight_length, latency, trinkets=[], haste_multiplier=1.0,
-        hot_uptime=0.0, mangle_idol=None, rake_idol=None, **kwargs
+        hot_uptime=0.0, mangle_idol=None, rake_idol=None, mutilation_idol=None, **kwargs
     ):
         """Initialize simulation.
 
@@ -216,6 +216,8 @@ class Simulation():
                 automatically if appropriate.
             rake_idol (trinkets.ProcTrinket): Optional Rake/Lacerate proc Idol
                 to use.
+            mutilation_idol (trinkets.RefreshingProcTrinket): Optional Mangle/
+                Shred proc idol to use.
             kwargs (dict): Key, value pairs for all other encounter parameters,
                 including boss armor, relevant debuffs, and player stregy
                 specification. An error will be thrown if the parameter is not
@@ -228,6 +230,7 @@ class Simulation():
         self.trinkets = trinkets
         self.mangle_idol = mangle_idol
         self.rake_idol = rake_idol
+        self.mutilation_idol = mutilation_idol
         self.params = copy.deepcopy(self.default_params)
         self.strategy = copy.deepcopy(self.default_strategy)
 
@@ -816,12 +819,13 @@ class Simulation():
     def clip_roar(self, time):
         """Determine whether to clip a currently active Savage Roar in order to
         de-sync the Rip and Roar timers.
+
         Arguments:
             time (float): Current simulation time in seconds.
         Returns:
             can_roar (bool): Whether or not to clip Roar now.
         """
-        if (not self.rip_debuff) or (self.fight_length - self.rip_end < 10):
+        if (not self.rip_debuff) or self.block_rip_next:
             return False
 
         # Project Rip end time assuming full Glyph of Shred extensions.
@@ -849,61 +853,62 @@ class Simulation():
         # after the current Rip.
         return (new_roar_end >= rip_end + self.strategy['min_roar_offset'])
 
-    # def clip_roar_experimental(self, time):
-    #     """Determine whether to clip a currently active Savage Roar in order to
-    #     de-sync the Rip and Roar timers.
+    def emergency_roar(self, time):
+        """This function handles special logic to handle overriding the
+        standard Roar offsetting logic above in cases where the Rip and Roar
+        timers have become so closely synced relative to available Energy/CPs
+        that an inefficient low-CP Roar clip is required to save both timers.
+        Specifically, if Rip is currently not applied or is due to fall off
+        before the current Roar, then the standard logic forbids a Roar clip
+        and instead recommends building for Rip first. But in cases where there
+        is simply not enough time to build for Rip before Roar will *also*
+        expire, then clipping Roar first should be preferable.
 
-    #     Arguments:
-    #         time (float): Current simulation time in seconds.
+        Arguments:
+            time (float): Current simulation time in seconds.
 
-    #     Returns:
-    #         can_roar (bool): Whether or not to clip Roar now.
-    #     """
-    #     # If existing Roar already covers the rest of the fight, don't clip.
-    #     if self.roar_end >= self.fight_length:
-    #         return False
+        Returns:
+            emergency_roar_now (bool): Whether or not to execute an emergency
+                SR cast.
+        """
+        # The emergency logic does not apply if we are in "normal" offsetting
+        # territory where the current Roar will expire before the current Rip,
+        # or if we are close enough to end of fight.
+        if self.roar_end >= self.fight_length:
+            return False
+        if (self.rip_debuff and (self.roar_end < self.rip_end)):
+            return False
+        if self.block_rip_next:
+            return False
 
-    #     # If Rip isn't currently up, then also don't clip so we can get it up.
-    #     if (not self.rip_debuff):
-    #         return False
+        # Perform an estimate of the earliest we could reasonably cast Rip
+        # given current Energy/CP and FF/TF timers. Assume that all builders
+        # will Crit but no natural Omen procs.
+        min_builders_for_rip = np.ceil(
+            (self.strategy['min_combos_for_rip']-self.player.combo_points)/2
+        )
+        energy_for_rip = (
+            min_builders_for_rip * self.player.shred_cost
+            + self.player.rip_cost
+        )
+        ff_available = self.player.faerie_fire_cd < (self.roar_end - time)
+        gcd_time_for_rip = min_builders_for_rip + 1.0 + ff_available
+        energy_time_for_rip = 0.1 * (
+            energy_for_rip - self.player.energy
+            - (ff_available + self.player.omen_proc) * self.player.shred_cost
+            - 60. * self.tf_expected_before(time, self.roar_end)
+        )
+        min_time_for_rip = max(gcd_time_for_rip, energy_time_for_rip)
 
-    #     # Project Rip end time assuming full Glyph of Shred extensions.
-    #     max_rip_dur = self.player.rip_duration + 6 * self.player.shred_glyph
-    #     rip_end = self.rip_start + max_rip_dur
+        # If min_time_for_rip takes us too close to fight end, then don't
+        # emergency Roar since we'll just be Biting anyway.
+        if self.bite_over_rip(time + min_time_for_rip, future_refresh=True):
+            return False
 
-    #     # Calculate when Roar would end if we cast it now.
-    #     new_roar_dur = (
-    #         self.player.roar_durations[self.player.combo_points]
-    #         + 8 * self.player.t8_4p_bonus
-    #     )
-    #     new_roar_end = time + new_roar_dur
-
-    #     # If the existing Roar already falls off after the existing Rip, then
-    #     # we shouldn't clip in order to maximize CP generation leeway for the
-    #     # Rip refresh. The only exception to this is if the existing Rip will
-    #     # be the last one of the fight AND the new Roar will be the last one of
-    #     # the fight.
-    #     if self.roar_end > rip_end:
-    #         return False
-    #         # return (
-    #         #     (new_roar_end >= self.fight_length)
-    #         #     and (self.fight_length - rip_end < 10)
-    #         # )
-
-    #     # If clipping Roar now will cover us for the rest of the fight, then do
-    #     # it so we can start generating CPs for end-of-fight Bites.
-    #     if new_roar_end >= self.fight_length:
-    #         return True
-
-    #     # Finally, we handle the interesting conflict scenario of clipping to
-    #     # desync the Rip and Roar timers. First exclude end-of-fight conflicts
-    #     # since we won't be refreshing Rip at all in those cases.
-    #     if self.fight_length - rip_end < 10:
-    #         return False
-
-    #     # Clip as soon as we have enough CPs for the new Roar to expire well
-    #     # after the current Rip.
-    #     return (new_roar_end >= rip_end + self.strategy['min_roar_offset'])
+        # Perform the emergency Roar if min_time_for_rip exceeds the remaining
+        # Roar duration in order to prevent the disaster scenario where both
+        # are down simultaneously.
+        return (time + min_time_for_rip >= self.roar_end)
 
     def should_bearweave(self, time):
         """Determine whether the player should initiate a bearweave.
@@ -1093,18 +1098,33 @@ class Simulation():
         bite_cp = self.strategy['min_combos_for_bite']
 
         # block_rip_now prevents Rip usage too close to fight end
-        block_rip_now = (cp < rip_cp) or self.bite_over_rip(time)
+        self.block_rip_now = (cp < rip_cp) or self.bite_over_rip(time)
         rip_now = (
             (cp >= rip_cp) and (not self.rip_debuff)
-            and (not self.player.omen_proc)
-            and (not block_rip_now)
+            # and (not self.player.omen_proc)
+            and (not self.block_rip_now)
         )
+
+        # Do not spend Clearcasting on Rip *unless* we are in an edge case
+        # where Roar is nearly about to expire.
+        if rip_now and self.player.omen_proc:
+            # Determine the earliest we could cast Rip if we do *not* use our
+            # Omen proc on it, and instead spend it on Shred first.
+            rip_cast_time = time + max(
+                1.0, (self.player.rip_cost - energy) / 10. + self.latency
+            )
+            rip_now = (
+                self.player.savage_roar and (rip_cast_time >= self.roar_end)
+            )
+
         # Likewise, block_rip_next prios Bite usage if the *current* Rip will
         # expire too close to fight end.
-        block_rip_next = self.rip_debuff and (
+        self.block_rip_next = self.rip_debuff and (
             self.bite_over_rip(self.rip_end, future_refresh=True)
         )
-        bite_at_end = (cp >= bite_cp) and (block_rip_now or block_rip_next)
+        bite_at_end = (
+            (cp >= bite_cp) and (self.block_rip_now or self.block_rip_next)
+        )
 
         # Clip Mangle if it won't change the total number of Mangles we have to
         # cast before the fight ends.
@@ -1129,7 +1149,7 @@ class Simulation():
             # and (not self.player.omen_proc)
         )
         aoe_mangle = (
-            self.strategy['aoe'] and self.mangle_idol and (cp == 0) and
+            self.strategy['aoe'] and (self.mangle_idol or self.mutilation_idol) and (cp == 0) and
             ((not self.player.savage_roar) or (self.roar_end - time <= 1.0))
         )
         mangle_now = mangle_now or aoe_mangle
@@ -1237,6 +1257,10 @@ class Simulation():
         # pool_for_roar = (not roar_now) and (cp >= 1) and self.clip_roar(time)
         roar_now = (cp >= 1) and (
             (not self.player.savage_roar) or self.clip_roar(time)
+            # or self.emergency_roar(time)
+        )
+        self.roar_refresh_pending = (
+            self.player.savage_roar and (self.roar_end < self.fight_length)
         )
 
         # Faerie Fire on cooldown for Omen procs. Each second of FF delay is
@@ -1258,15 +1282,23 @@ class Simulation():
         # given by 1 second for FF GCD  plus 1 second for Clearcast Shred plus
         # 1 second per 42 Energy that we have after that Clearcast Shred.
         if ff_now:
+            # Same end of fight logic can be applied for end of Berserk also,
+            # as we don't want to cast even a low Energy FF if it will result
+            # in ending Berserk with > 21 Energy and missing a discounted Shred
+            if False: # if self.player.berserk:
+                boundary_condition = min(self.berserk_end, self.fight_length)
+            else:
+                boundary_condition = self.fight_length
+
             max_shreds_without_ff = (
-                (energy + (self.fight_length - time) * 10)
+                (energy + (boundary_condition - time) * 10)
                 // self.player.shred_cost # floored integer division here
             )
             num_shreds_without_ff = min(
-                max_shreds_without_ff, int(self.fight_length - time) + 1
+                max_shreds_without_ff, int(boundary_condition - time) + 1
             )
             num_shreds_with_ff = min(
-                max_shreds_without_ff + 1, int(self.fight_length - time)
+                max_shreds_without_ff + 1, int(boundary_condition - time)
             )
             ff_now = (num_shreds_with_ff > num_shreds_without_ff)
 
@@ -1287,7 +1319,7 @@ class Simulation():
         pending_actions = []
         self.rip_refresh_pending = False
 
-        if (self.rip_debuff and (cp == rip_cp) and (not block_rip_next)):
+        if (self.rip_debuff and (cp == rip_cp) and (not self.block_rip_next)):
             rip_cost = self.player._rip_cost / 2 if self.berserk_expected_at(time, self.rip_end) else self.player._rip_cost
             pending_actions.append((self.rip_end, rip_cost))
             self.rip_refresh_pending = True
@@ -1373,6 +1405,7 @@ class Simulation():
                 flower_end + energy_to_dump // 42 < self.fight_length
             )
 
+        # Pooling logic section
         floating_energy = 0
         previous_time = time
         tf_pending = False
@@ -1391,6 +1424,39 @@ class Simulation():
                 previous_time = refresh_time
             else:
                 previous_time += refresh_cost / 10.
+
+        # If any proc trinkets are due to come off ICD soon, then force pool up
+        # to the Energy cap in order to maximize special ability casts with the
+        # proc active.
+        time_to_cap = time + (100. - energy) / 10.
+        trinket_active = False
+        pool_for_trinket = False
+
+        for trinket in self.player.proc_trinkets:
+            if trinket.special_proc_conditions or (trinket.cooldown == 0):
+                continue
+            if trinket.active or (not self.rip_debuff):
+                trinket_active = True
+                pool_for_trinket = False
+                break
+
+            earliest_proc = trinket.activation_time + trinket.cooldown
+            earliest_proc_end = earliest_proc + trinket.proc_duration
+
+            if ((earliest_proc < time_to_cap)
+                    and (earliest_proc_end < self.fight_length)):
+                pool_for_trinket = True
+
+        if pool_for_trinket:
+            floating_energy = max(floating_energy, 100)
+
+        # Another scenario to force pool is when we have 5 CP, have a pending
+        # Roar or Rip refresh soon, and cannot fit in a Bite.
+        if ((cp == 5) and (not (bite_before_rip or bite_at_end))
+                and (not trinket_active) and self.roar_refresh_pending
+                and self.rip_refresh_pending
+                and (min(self.roar_end, self.rip_end) < time_to_cap)):
+            floating_energy = max(floating_energy, 100)
 
         excess_e = energy - floating_energy
         time_to_next_action = 0.0
@@ -1583,7 +1649,9 @@ class Simulation():
 
             # Also Shred if we're about to cap on Energy. Catches some edge
             # cases where floating_energy > 100 due to too many synced timers.
-            if energy > 100 - self.latency:
+            energy_cap = 77. if self.player.faerie_fire_cd <= 1.0 else 100.
+
+            if energy > energy_cap - self.latency:
                 return self.shred()
 
             time_to_next_action = (self.player.shred_cost - excess_e) / 10.
@@ -1643,6 +1711,13 @@ class Simulation():
 
         # Schedule an action when Faerie Fire (Feral) is off cooldown next.
         next_action = min(next_action, time + self.player.faerie_fire_cd)
+
+        # If nearing Energy cap, then also schedule an action 1 GCD beforehand.
+        if ((energy + 10 * (self.player.faerie_fire_cd + self.latency) >= 87)
+                and (self.player.faerie_fire_cd >= 1.0)):
+            next_action = min(
+                next_action, time + self.player.faerie_fire_cd - 1.0
+            )
 
         self.next_action = next_action + self.latency
 
