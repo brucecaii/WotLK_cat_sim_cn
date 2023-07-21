@@ -1041,15 +1041,15 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.4',
+        children='Nerd Ecat Sims WLK猫德模拟器 v3.5',
         style={'textAlign': 'center'}
     ),
     html.H5(
-        children='Nerdegghead授权 范克瑞斯Espeon翻译/编译',
+        children='Nerdegghead授权 财高八抖翻译/编译',
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='2023.05.14',
+        children='2023.07.20',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(

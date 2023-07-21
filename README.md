@@ -26,6 +26,7 @@ Github https://github.com/eeveecc/WotLK_cat_sim_cn
 2023.04.25 更新AOE循环模拟
 2023.05.01 更新P4饰品和神像
 2023.05.14 更新剑刃刺绣,优化算法
+2023.07.20 优化AOE,饰品触发存能量算法
 ```
 
 ## 开发
