@@ -1050,7 +1050,7 @@ input_layout = html.Div(children=[
         style={'textAlign': 'center', "color": 'yellow'}
     ),
     html.H5(
-        children='2023.07.20',
+        children='2023.09.06',
         style={'textAlign': 'center', "color": 'red'}
     ),
     dbc.Row(
