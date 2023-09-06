@@ -116,7 +116,7 @@ buffs_1 = dbc.Col(
                   {'label': '熏烤龙鳞鱼(40敏捷)', 'value': 'agi_food'},
                   {'label': '龙鳞鱼片(40力量)', 'value': 'str_food'},
                   {'label': '犀牛大餐(40破甲)', 'value': 'arp_food'}],
-         value=['flask', 'agi_food'],
+         value=['flask', 'str_food'],
          id='consumables'
     ),
         html.Br(),
@@ -240,13 +240,14 @@ buffs_1 = dbc.Col(
             {'label': '狼头之盔', 'value': 'wolfshead'},
             {'label': '残酷多彩', 'value': 'meta'},
             {'label': '武器猫鼬', 'value': 'mongoose'},
+            {'label': '武器斩杀', 'value': 'executioner'},
             {'label': '武器狂暴', 'value': 'berserking'},
             {'label': '手套加速器', 'value': 'engi_gloves'},
             {'label': '剑刃刺绣', 'value': 'ap_cloak'},
         ],
         value=[
-            'idol_of_mutilation', 'shred_glyph', 'roar_glyph', 't9_2p',
-            't9_4p', 'meta', 'berserking', 'engi_gloves'
+            'rake_idol', 'shred_glyph', 'roar_glyph', 't10_2p',
+            't10_4p', 'meta', 'berserking', 'engi_gloves'
         ],
         id='bonuses'
     ),
@@ -260,7 +261,7 @@ encounter_details = dbc.Col(
          [
              dbc.InputGroupAddon('时长', addon_type='prepend'),
              dbc.Input(
-                 value=180.0, type='number', id='fight_length',
+                 value=240.0, type='number', id='fight_length',
              ),
              dbc.InputGroupAddon('秒', addon_type='append')
          ],
@@ -305,7 +306,7 @@ encounter_details = dbc.Col(
                 'value': 'curse_of_elements'
              },
          ],
-         value=['gift_of_arthas', 'sunder', 'faerie_fire', 'blood_frenzy', 'curse_of_elements'],
+         value=['sunder', 'faerie_fire', 'blood_frenzy', 'curse_of_elements'],
          id='boss_debuffs'
     ),
         dbc.Checklist(
@@ -339,7 +340,7 @@ encounter_details = dbc.Col(
              dbc.InputGroupAddon('药水', addon_type='prepend'),
              dbc.Select(
                  options=[
-                     {'label': '加速药水', 'value': 'haste'},
+                     {'label': '加速药水(包括偷药)', 'value': 'haste'},
                      {'label': '空', 'value': 'none'},
                  ],
                  value='haste', id='potion',
@@ -583,7 +584,7 @@ iteration_input = dbc.Col([
     dbc.InputGroup(
         [
             dbc.InputGroupAddon('样本数量', addon_type='prepend'),
-            dbc.Input(value=30000, type='number', id='num_replicates')
+            dbc.Input(value=50000, type='number', id='num_replicates')
         ],
         style={'width': '100%'}
     ),
@@ -650,7 +651,7 @@ iteration_input = dbc.Col([
                 '保持咆哮和割间隔', addon_type='prepend'
             ),
             dbc.Input(
-                value=25, min=0, step=1, type='number', id='min_roar_offset'
+                value=26, min=0, step=1, type='number', id='min_roar_offset'
             ),
             dbc.InputGroupAddon('秒(4T8为34秒,其他24秒)', addon_type='append')
         ],
@@ -662,7 +663,7 @@ iteration_input = dbc.Col([
                 '割裂余地(Leeway)延迟设置:', addon_type='prepend'
             ),
             dbc.Input(
-                value=4, min=0, step=1, type='number', id='roar_clip_leeway'
+                value=5, min=0, step=1, type='number', id='roar_clip_leeway'
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
@@ -687,7 +688,7 @@ iteration_input = dbc.Col([
                 addon_type='prepend'
             ),
             dbc.Input(
-                value=0.1, min=0, step=0.1, type='number', id='max_ff_delay'
+                value=0.2, min=0, step=0.1, type='number', id='max_ff_delay'
             ),
             dbc.InputGroupAddon('seconds', addon_type='append')
         ],
@@ -935,7 +936,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='mjolnir_runestone'
+            value='dbw'
         )),
         dbc.Col(dbc.Select(
             id='trinket_2',
@@ -966,7 +967,7 @@ iteration_input = dbc.Col([
                 {'label': '死亡卡牌', 'value': 'dmcd'},
                 {'label': '悲苦之泪', 'value': 'tears'}
             ],
-            value='deaths_verdict_heroic'
+            value='whispering_fanged_skull'
         )),
     ]),
     html.Div([
