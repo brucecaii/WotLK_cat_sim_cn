@@ -1042,7 +1042,7 @@ iteration_input = dbc.Col([
 
 input_layout = html.Div(children=[
     html.H1(
-        children='Nerd Ecat Sims WLK猫德模拟器 v3.5',
+        children='Nerd Ecat Sims WLK猫德模拟器 v4.0 (P4)',
         style={'textAlign': 'center'}
     ),
     html.H5(
